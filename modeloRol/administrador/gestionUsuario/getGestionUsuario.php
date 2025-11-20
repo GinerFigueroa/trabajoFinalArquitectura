@@ -1,5 +1,4 @@
 <?php
-// C:\xampp\htdocs\TRABAJOFINALARQUITECTURA\modeloRol\administrador\gestionUsuario\getGestionUsuario.php
 session_start();
 
 include_once('../../../shared/mensajeSistema.php');
@@ -8,15 +7,23 @@ include_once('./controlGestionUsuario.php');
 $objControl = new controlGestionUsuario();
 $objMensaje = new mensajeSistema();
 
-// Emulación del CHAIN OF RESPONSIBILITY (Validación de existencia de parámetros)
-if (isset($_GET['action']) && $_GET['action'] == 'eliminar' && isset($_GET['id'])) {
-    $idUsuario = $_GET['id'];
+if (isset($_GET['action']) && isset($_GET['id'])) {
+    $idUsuario = (int)$_GET['id'];
+    $action = $_GET['action'];
     
-    // El controlador ejecuta la validación (CHAIN) y la acción (COMMAND)
-    $objControl->eliminarUsuario($idUsuario);
-    
+    switch ($action) {
+        case 'eliminar':
+            $objControl->eliminarUsuario($idUsuario);
+            break;
+        case 'desactivar':
+            $objControl->desactivarUsuario($idUsuario);
+            break;
+        case 'reactivar': // NUEVO CASO
+            $objControl->reactivarUsuario($idUsuario);
+            break;
+        default:
+            $objMensaje->mensajeSistemaShow("Acción no reconocida", "./indexGestionUsuario.php", "error");
+    }
 } else {
-    // Falla el CHAIN de parámetros iniciales
-    $objMensaje->mensajeSistemaShow("Acción no reconocida o parámetros incompletos (CHAIN FAILED)", "./indexGestionUsuario.php", "error");
+    $objMensaje->mensajeSistemaShow("Parámetros incompletos", "./indexGestionUsuario.php", "error");
 }
-?>

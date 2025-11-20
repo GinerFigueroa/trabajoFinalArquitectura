@@ -1,5 +1,5 @@
 <?php
-// C:\xampp\htdocs\TRABAJOFINALARQUITECTURA\modeloRol\administrador\gestionUsuario\registrarUsuario\controlRegistroUsuario.php
+
 include_once('../../../../modelo/UsuarioDAO.php');
 include_once('../../../../shared/mensajeSistema.php');
 
@@ -59,7 +59,7 @@ class controlRegistroUsuario // MEDIATOR
         
         if ($validacion !== true) {
             // Se usa './indexRegistroUsuario.php' para volver al formulario
-            $this->objMensaje->mensajeSistemaShow($validacion, './indexRegistroUsuario.php', 'systemOut', false);
+            $this->objMensaje->mensajeSistemaShow($validacion, '../indexGestionUsuario.php', 'systemOut', false);
             return;
         }
 
@@ -76,11 +76,11 @@ class controlRegistroUsuario // MEDIATOR
         if ($resultado) {
             $this->setEstadoRegistro('Exito');
             // Vuelve a la lista principal
-            $this->objMensaje->mensajeSistemaShow('Usuario registrado correctamente.', './../indexGestionUsuario.php', 'success');
+            $this->objMensaje->mensajeSistemaShow('Usuario registrado correctamente.', '../indexGestionUsuario.php', 'success');
         } else {
             $this->setEstadoRegistro('Fallo');
              // Vuelve al formulario de registro
-            $this->objMensaje->mensajeSistemaShow('Error al registrar el usuario.', './indexRegistroUsuario.php', 'error');
+            $this->objMensaje->mensajeSistemaShow('Error al registrar el usuario.', '../indexGestionUsuario.php', 'error');
         }
     }
 }

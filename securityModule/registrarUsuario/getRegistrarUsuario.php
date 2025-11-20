@@ -27,7 +27,8 @@ function buildUserDataFromPost() {
 // Emulación del patrón CHAIN OF RESPONSIBILITY: Valida la existencia de datos POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['action']) || $_POST['action'] !== 'registrar') {
     // 🚨 ESTO SE EJECUTA SI FALLA CUALQUIERA DE LAS CONDICIONES
-    $objMensaje->mensajeSistemaShow("Acceso no autorizado o acción no válida. (CHAIN/POST)", './indexRegistroUsuario.php', 'error');
+    $objMensaje->mensajeSistemaShow("Acceso no autorizado o acción no válida. (CHAIN/POST)", '
+    ../indexLoginSegurity.php', 'error');
     exit();
 
 }
@@ -37,7 +38,8 @@ $data = buildUserDataFromPost();
 
 // 2. Validación de campos obligatorios (CHAIN simplificado)
 if (empty($data['login']) || empty($data['nombre']) || empty($data['apellidoPaterno']) || empty($data['email']) || empty($data['telefono']) || empty($data['clave']) || empty($data['idRol'])) {
-    $objMensaje->mensajeSistemaShow('Todos los campos obligatorios deben ser completados. (CHAIN/DATA)', './indexRegistroUsuario.php', 'systemOut', false);
+    $objMensaje->mensajeSistemaShow('Todos los campos obligatorios deben ser completados. (CHAIN/DATA)', '
+    ../indexLoginSegurity.php', 'systemOut', false);
     exit();
 }
 

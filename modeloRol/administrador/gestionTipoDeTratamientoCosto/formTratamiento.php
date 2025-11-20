@@ -41,6 +41,9 @@ class formTratamiento extends pantalla // TEMPLATE METHOD
                     <a href="./agregarTratamiento/indexAgregarTratamiento.php" class="btn btn-success">
                         <i class="bi bi-plus-circle-fill me-2"></i>Registrar Nuevo Tratamiento
                     </a>
+                                <a href="../gestionUsuario/indexGestionUsuario.php" class="btn btn-secondary me-2">
+                <i class="bi bi-arrow-left me-1"></i>Volver a Reportes
+            </a>
                 </div>
             </div>
             

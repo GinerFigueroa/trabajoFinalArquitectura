@@ -1,13 +1,12 @@
 <?php
-// C:\xampp\htdocs\TRABAJOFINALARQUITECTURA\modeloRol\administrador\gestionUsuario\controlGestionUsuario.php
 include_once('../../../shared/mensajeSistema.php');
-include_once('../../../modelo/UsuarioDAO.php'); // Se corrige la ruta
+include_once('../../../modelo/UsuarioDAO.php');
 
-class controlGestionUsuario // MEDIATOR
+class controlGestionUsuario
 {
-    private $objUsuarioDAO; // Emula el COMMAND Receiver
+    private $objUsuarioDAO;
     private $objMensaje;
-    private $estadoActual = 'Inicial'; // Emula el STATE
+    private $estadoActual = 'Inicial';
 
     public function __construct()
     {
@@ -15,39 +14,83 @@ class controlGestionUsuario // MEDIATOR
         $this->objMensaje = new mensajeSistema();
     }
     
-    // Emulación del patrón STATE
     private function setEstado($nuevoEstado) {
         $this->estadoActual = $nuevoEstado;
-        // Aquí se podría añadir lógica de transición o registro de estado
     }
     
     /**
-     * Elimina un usuario.
-     * Emula la lógica de CHAIN OF RESPONSIBILITY (validaciones) y COMMAND (ejecución).
+     * COMMAND: Eliminar usuario
      */
-    public function eliminarUsuario($idUsuario) // Emula el COMMAND
+    public function eliminarUsuario($idUsuario)
     {
-        // 1. Emulación del CHAIN OF RESPONSIBILITY (Validaciones)
         $this->setEstado('ValidandoID');
         if (!is_numeric($idUsuario) || $idUsuario <= 0) {
-            $this->objMensaje->mensajeSistemaShow("ID de usuario no válido para eliminación.", "./indexGestionUsuario.php", "error");
+            $this->objMensaje->mensajeSistemaShow("ID de usuario no válido.", "./indexGestionUsuario.php", "error");
             return;
         }
 
-        // Se podrían añadir más validaciones (e.g., verificar si el usuario existe antes de intentar eliminar)
+        $this->setEstado('VerificandoRelaciones');
+        $resultado = $this->objUsuarioDAO->eliminarUsuarioSiEsPosible($idUsuario);
         
-        // 2. Ejecución del COMMAND (Ejecutar la acción)
-        $this->setEstado('EjecutandoComando');
-        $resultado = $this->objUsuarioDAO->eliminarUsuario($idUsuario);
+        if ($resultado['success']) {
+            $this->setEstado('Exito');
+            $this->objMensaje->mensajeSistemaShow($resultado['message'], "./indexGestionUsuario.php", "success");
+        } else {
+            $this->setEstado('OfreciendoAlternativa');
+            $mensaje = $resultado['message'] . ". ¿Desea desactivarlo en su lugar?";
+            echo "<script>
+                if (confirm('" . $mensaje . "')) {
+                    window.location.href = './getGestionUsuario.php?action=desactivar&id=" . $idUsuario . "';
+                } else {
+                    window.location.href = './indexGestionUsuario.php';
+                }
+            </script>";
+        }
+    }
+
+    /**
+     * COMMAND: Desactivar usuario
+     */
+    public function desactivarUsuario($idUsuario)
+    {
+        $this->setEstado('ValidandoID');
+        if (!is_numeric($idUsuario) || $idUsuario <= 0) {
+            $this->objMensaje->mensajeSistemaShow("ID de usuario no válido.", "./indexGestionUsuario.php", "error");
+            return;
+        }
+
+        $this->setEstado('EjecutandoDesactivacion');
+        $resultado = $this->objUsuarioDAO->desactivarUsuario($idUsuario);
         
-        // 3. Manejo de respuesta (Delegado al Mensaje)
         if ($resultado) {
             $this->setEstado('Exito');
-            $this->objMensaje->mensajeSistemaShow("Usuario eliminado correctamente.", "./indexGestionUsuario.php", "success");
+            $this->objMensaje->mensajeSistemaShow("Usuario desactivado correctamente.", "./indexGestionUsuario.php", "success");
         } else {
             $this->setEstado('Fallo');
-            $this->objMensaje->mensajeSistemaShow("Error al eliminar el usuario o el usuario no existe.", "./indexGestionUsuario.php", "error");
+            $this->objMensaje->mensajeSistemaShow("Error al desactivar el usuario.", "./indexGestionUsuario.php", "error");
+        }
+    }
+
+    /**
+     * COMMAND: Reactivar usuario
+     */
+    public function reactivarUsuario($idUsuario)
+    {
+        $this->setEstado('ValidandoID');
+        if (!is_numeric($idUsuario) || $idUsuario <= 0) {
+            $this->objMensaje->mensajeSistemaShow("ID de usuario no válido.", "./indexGestionUsuario.php", "error");
+            return;
+        }
+
+        $this->setEstado('EjecutandoReactivacion');
+        $resultado = $this->objUsuarioDAO->reactivarUsuario($idUsuario);
+        
+        if ($resultado) {
+            $this->setEstado('Exito');
+            $this->objMensaje->mensajeSistemaShow("Usuario reactivado correctamente.", "./indexGestionUsuario.php", "success");
+        } else {
+            $this->setEstado('Fallo');
+            $this->objMensaje->mensajeSistemaShow("Error al reactivar el usuario.", "./indexGestionUsuario.php", "error");
         }
     }
 }
-?>

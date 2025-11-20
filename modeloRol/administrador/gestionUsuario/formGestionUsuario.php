@@ -1,10 +1,9 @@
 <?php
-// C:\xampp\htdocs\TRABAJOFINALARQUITECTURA\modeloRol\administrador\gestionUsuario\formGestionUsuario.php
 include_once("../../../shared/pantalla.php"); 
 include_once("../../../modelo/UsuarioDAO.php"); 
 
 /**
- * Clase UsuarioIterator (Emulación de ITERATOR)
+ * Clase UsuarioIterator (ITERATOR)
  */
 class UsuarioIterator implements Iterator {
     private $usuarios;
@@ -19,16 +18,24 @@ class UsuarioIterator implements Iterator {
 
 class formGestionUsuario extends pantalla // TEMPLATE METHOD
 {
-    private $estadoFormulario = 'inicial'; // Emulación de STATE
+    private $estadoFormulario = 'inicial'; // STATE
 
     private function setEstadoFormulario($estado) { $this->estadoFormulario = $estado; }
 
-    // Emulación del patrón VISITOR: Aplica lógica de presentación de estado
-    private function acceptVisitor($usuario) {
+    // VISITOR: Aplica lógica de presentación de estado
+    private function visitarEstadoUsuario($usuario) {
         $activo = $usuario['activo'] == 1;
         $color = $activo ? 'success' : 'danger';
         $texto = $activo ? 'Activo' : 'Inactivo';
-        return ['color' => $color, 'texto' => $texto];
+        $esEliminable = $activo;
+        $esReactivable = !$activo; // NUEVO: indica si se puede reactivar
+        
+        return [
+            'color' => $color,
+            'texto' => $texto,
+            'esEliminable' => $esEliminable,
+            'esReactivable' => $esReactivable // NUEVO
+        ];
     }
 
     public function formGestionUsuarioShow()
@@ -40,22 +47,33 @@ class formGestionUsuario extends pantalla // TEMPLATE METHOD
         $listaUsuarios = $objUsuarioDAO->obtenerTodosUsuarios();
         
         $this->setEstadoFormulario('listando');
-        $usuarioIterator = new UsuarioIterator($listaUsuarios); // Uso del ITERATOR
+        $usuarioIterator = new UsuarioIterator($listaUsuarios); // ITERATOR
 ?>
 
-<div class="container mt-4">
-    <div class="card shadow">
-        <div class="card-header bg-primary text-white text-center">
-            <h4><i class="bi bi-person-fill-gear me-2"></i>Lista de Usuarios (Estado: <?php echo $this->estadoFormulario; ?>)</h4>
-        </div>
-        <div class="card-body">
-            <div class="row mb-3">
-                <div class="col-md-12 text-end">
-                    <a href="./registrarUsuario/indexRegitroUsuario.php" class="btn btn-success">
-        
-                        <i class="bi bi-person-add me-2"></i>Registrar Nuevo Usuario
-                    </a>
-                </div>
+<div class="row mb-3">
+    <!-- Botón Registrar Usuario -->
+    <div class="col-md-4 text-start">
+        <a href="./registrarUsuario/indexRegitroUsuario.php" class="btn btn-success w-100">
+            <i class="bi bi-person-add me-2"></i>Registrar Usuario
+        </a>
+    </div>
+
+    <!-- Botón Informes -->
+    <div class="col-md-4 text-center">
+        <a href="../gestionInformesFinanciero/indexDashboardBoletas.php" class="btn btn-dark w-100">
+            <i class="bi bi-bar-chart-line me-2"></i>Informes
+        </a>
+    </div>
+
+    <!-- Botón Tipo de Tratamiento -->
+    <div class="col-md-4 text-end">
+        <a href="../gestionTipoDeTratamientoCosto/indexTipoTratamiento.php" class="btn btn-primary w-100">
+            <i class="bi bi-arrow-right-circle me-2"></i>Tipo de Tratamiento
+        </a>
+    </div>
+</div>
+
+
             </div>
             
             <div class="table-responsive">
@@ -70,7 +88,7 @@ class formGestionUsuario extends pantalla // TEMPLATE METHOD
                         <?php 
                         if ($usuarioIterator->valid()) {
                             foreach ($usuarioIterator as $usuario) { 
-                                $estadoVisitado = $this->acceptVisitor($usuario); // Uso de VISITOR
+                                $estadoVisitado = $this->visitarEstadoUsuario($usuario); // VISITOR
                         ?>
                                 <tr>
                                     <td><?php echo htmlspecialchars($usuario['id_usuario']); ?></td>
@@ -87,9 +105,16 @@ class formGestionUsuario extends pantalla // TEMPLATE METHOD
                                         <a href="./editarUsuario/indexEditarUsuario.php?id=<?php echo htmlspecialchars($usuario['id_usuario']); ?>" class="btn btn-sm btn-warning" title="Editar">
                                             <i class="bi bi-pencil-fill"></i>
                                         </a>
-                                        <button class="btn btn-sm btn-danger" title="Eliminar" onclick="confirmarEliminar(<?php echo htmlspecialchars($usuario['id_usuario']); ?>)">
-                                            <i class="bi bi-trash-fill"></i>
-                                        </button>
+                                        <?php if ($estadoVisitado['esEliminable']) { ?>
+                                            <button class="btn btn-sm btn-danger" title="Eliminar/Desactivar" onclick="confirmarEliminar(<?php echo htmlspecialchars($usuario['id_usuario']); ?>)">
+                                                <i class="bi bi-trash-fill"></i>
+                                            </button>
+                                        <?php } ?>
+                                        <?php if ($estadoVisitado['esReactivable']) { ?>
+                                            <button class="btn btn-sm btn-success" title="Reactivar" onclick="confirmarReactivar(<?php echo htmlspecialchars($usuario['id_usuario']); ?>)">
+                                                <i class="bi bi-person-check-fill"></i>
+                                            </button>
+                                        <?php } ?>
                                     </td>
                                 </tr>
                             <?php }
@@ -105,8 +130,14 @@ class formGestionUsuario extends pantalla // TEMPLATE METHOD
 
 <script>
     function confirmarEliminar(id) {
-        if (confirm('¿Está seguro de que desea eliminar este usuario?')) {
+        if (confirm('¿Está seguro de que desea ELIMINAR este usuario?\n\n• Si NO tiene relaciones: se ELIMINARÁ completamente\n• Si tiene relaciones: se DESACTIVARÁ')) {
             window.location.href = `./getGestionUsuario.php?action=eliminar&id=${id}`;
+        }
+    }
+
+    function confirmarReactivar(id) {
+        if (confirm('¿Está seguro de que desea REACTIVAR este usuario?\n\nEl usuario podrá acceder al sistema nuevamente.')) {
+            window.location.href = `./getGestionUsuario.php?action=reactivar&id=${id}`;
         }
     }
 </script>
@@ -115,4 +146,3 @@ class formGestionUsuario extends pantalla // TEMPLATE METHOD
         $this->pieShow();
     }
 }
-?>

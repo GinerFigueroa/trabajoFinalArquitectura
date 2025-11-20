@@ -120,48 +120,7 @@ class screenBienvenida extends pantalla
                         </div>
                     </div>
                   </div>";
-                  
-            echo "<div class='col'>
-                    <div class='card'>
-                        <div class='card-admin icon-container text-center'>
-                            <i class='bi bi-file-earmark-bar-graph role-icon'></i>
-                        </div>
-                        <div class='card-body card-body-white text-center'>
-                            <h5 class='card-title'>Informes y Estadísticas</h5>
-                            <p class='card-text'>Genere reportes del sistema</p>
-                            <a href='../modeloRol/administrador/gestionInformesFinanciero/indexInformeFinanciero.php' class='btn btn-primary'><i class='bi bi-arrow-right-circle'></i> Acceder</a>
-                        </div>
-                    </div>
-                  </div>";
-                  
-            echo "<div class='col'>
-                    <div class='card'>
-                        <div class='card-admin icon-container text-center'>
-                            <i class='bi bi-sliders role-icon'></i>
-                        </div>
-                        <div class='card-body card-body-white text-center'>
-                            <h5 class='card-title'>Configuración del Sistema</h5>
-                            <p class='card-text'>Ajustar parámetros del sistema</p>
-                            <a href='../moduloConfiguracion/indexConfiguracion.php' class='btn btn-primary'><i class='bi bi-arrow-right-circle'></i> Acceder</a>
-                        </div>
-                    </div>
-                  </div>";
-                  
-  
-                  
-           echo "<div class='col'>
-                    <div class='card'>
-                        <div class='card-recepcion icon-container text-center'>
-                            <i class='bi bi-card-checklist role-icon'></i>
-                        </div>
-                        <div class='card-body card-body-white text-center'>
-                            <h5 class='card-title'>Tipo de Tratamiento</h5>
-                            <p class='card-text'>Seleccionar tratamiento y costo</p>
-                            <a href='../modeloRol/recepcion/gestionTipoDeTratamientoCosto/indexTipoTratamiento.php' class='btn btn-primary'><i class='bi bi-arrow-right-circle'></i> Acceder</a>
-                        </div>
-                    </div>
-                  </div>";
-                          
+                    
           
 
                   
