@@ -1,0 +1,167 @@
+/* Estilo general para el cuerpo */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f8ff; /* Fondo azul claro */
+    color: #333;
+}
+
+/* Encabezado principal */
+header {
+    background-color: #0074d9; /* Azul vibrante */
+    color: white;
+    padding: 20px;
+    text-align: center;
+    font-size: 24px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Línea divisoria */
+hr {
+    border: 0;
+    height: 1px;
+    background: #ddd;
+}
+
+/* Footer o pie de página */
+footer {
+    background-color: #003366; /* Azul oscuro */
+    color: white;
+    text-align: center;
+    padding: 10px;
+    font-size: 14px;
+    margin-top: 20px;
+}
+
+/* Contenedor para opciones */
+.optionsBar {
+    background-color: #ff851b; /* Naranja vibrante */
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.optionsBar p {
+    margin: 0;
+}
+
+.optionsBar img {
+    height: 30px;
+    border-radius: 50%;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+/* Estilo para los botones de salir */
+.optionsBar .close {
+    border-radius: 0;
+    height: 25px;
+    cursor: pointer;
+}
+
+/* Estilo de los formularios */
+form {
+    background: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px auto;
+    max-width: 400px;
+    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #0074d9;
+}
+
+form input[type="text"],
+form input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+form button {
+    background-color: #0074d9;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+form button:hover {
+    background-color: #005bb5;
+}
+
+/* Estilo de imágenes */
+img {
+    max-width: 100%;
+    display: block;
+    margin: 0 auto;
+}
+
+/* Marquee en el footer */
+marquee {
+    color: #ffdc00; /* Amarillo vibrante */
+    font-weight: bold;
+}
+
+
+
+
+
+
+
+
+
+/* Estilo para el contenedor del enlace */
+a {
+    display: inline-block;
+    text-align: center;
+}
+
+/* Estilo para la imagen */
+.close {
+    width: 50px; /* Ajusta el tamaño de la imagen */
+    height: 50px; /* Ajusta el tamaño de la imagen */
+    border-radius: 50%; /* Si deseas bordes redondeados */
+    transition: transform 0.3s ease; /* Efecto de transición al pasar el mouse */
+}
+
+/* Efecto de hover para la imagen */
+.close:hover {
+    transform: scale(1.1); /* Agranda la imagen al pasar el mouse */
+}
+
+/* Puedes añadir un fondo alrededor del enlace (opcional) */
+a {
+    background-color: #f8f9fa; /* Fondo claro */
+    padding: 10px; /* Espaciado alrededor de la imagen */
+    border-radius: 10px; /* Bordes redondeados */
+}
+
+/* Añadir sombra al pasar el mouse (opcional) */
+a:hover {
+    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2); /* Sombra ligera */
+}
+
+
+
+
+
+
+
+
+
