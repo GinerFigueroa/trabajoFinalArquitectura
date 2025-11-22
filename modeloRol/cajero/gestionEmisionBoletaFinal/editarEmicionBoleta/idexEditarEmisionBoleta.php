@@ -1,6 +1,6 @@
 <?php
 
-
+session_start();
 include_once('./formEditarEmisionBoleta.php');
     
 $obj = new formEditarEmisionBoleta();

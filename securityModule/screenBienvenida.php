@@ -120,6 +120,18 @@ class screenBienvenida extends pantalla
                         </div>
                     </div>
                   </div>";
+                   echo "<div class='col'>
+                    <div class='card'>
+                        <div class='card-admin icon-container text-center'>
+                            <i class='bi bi-people-fill role-icon'></i>
+                        </div>
+                        <div class='card-body card-body-white text-center'>
+                            <h5 class='card-title'> Gestion bot telegran</h5>
+                            <p class='card-text'>Gestion Telegran, bot registra , editar</p>
+                            <a href='../modeloRol/administrador/gestionRecordatorioPaciente/indexRecordatorioPaciente.php' class='btn btn-primary'><i class='bi bi-arrow-right-circle'></i> Acceder</a>
+                        </div>
+                    </div>
+                  </div>";
                     
           
 
@@ -272,18 +284,7 @@ echo "<div class='col'>
             echo "<h3 class='section-title'><i class='bi bi-person-heart'></i> Portal del Paciente</h3>";
             echo "<div class='row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4'>";
             
-            echo "<div class='col'>
-                    <div class='card'>
-                        <div class='card-paciente icon-container text-center'>
-                            <i class='bi bi-calendar-plus-fill role-icon'></i>
-                        </div>
-                        <div class='card-body card-body-white text-center'>
-                            <h5 class='card-title'>Programar Citas ------xxxx</h5>
-                            <p class='card-text'>Solicitar citas en línea</p>
-                            <a href='../modeloRol/paciente/citas/indexCitas.php' class='btn btn-primary'><i class='bi bi-arrow-right-circle'></i> Acceder</a>
-                        </div>
-                    </div>
-                  </div>";
+         
                   
             echo "<div class='col'>
                     <div class='card'>
@@ -291,80 +292,17 @@ echo "<div class='col'>
                             <i class='bi bi-file-medical-fill role-icon'></i>
                         </div>
                         <div class='card-body card-body-white text-center'>
-                            <h5 class='card-title'>Mi Historial Médico</h5>
+                            <h5 class='card-title'>Ver Mis Citas Medicas</h5>
                             <p class='card-text'>Consultar historial y diagnósticos</p>
-                            <a href='../modeloRol/paciente/historial/indexHistorial.php' class='btn btn-primary'><i class='bi bi-arrow-right-circle'></i> Acceder</a>
-                        </div>
-                    </div>
-                  </div>";
-                  
-            echo "<div class='col'>
-                    <div class='card'>
-                        <div class='card-paciente icon-container text-center'>
-                            <i class='bi bi-chat-left-text-fill role-icon'></i>
-                        </div>
-                        <div class='card-body card-body-white text-center'>
-                            <h5 class='card-title'>Comunicación-----xxxx</h5>
-                            <p class='card-text'>Enviar mensajes a la clínica</p>
-                            <a href='../moduloComunicacion/indexComunicacion.php' class='btn btn-primary'><i class='bi bi-arrow-right-circle'></i> Acceder</a>
-                        </div>
-                    </div>
-                  </div>";
-                  
-            echo "<div class='col'>
-                    <div class='card'>
-                        <div class='card-paciente icon-container text-center'>
-                            <i class='bi bi-wallet2 role-icon'></i>
-                        </div>
-                        <div class='card-body card-body-white text-center'>
-                            <h5 class='card-title'>Mis Pagos</h5>
-                            <p class='card-text'>Consultar pagos y presupuestos</p>
-                            <a href='../modeloRol/paciente/facturacion/indexPagos.php' class='btn btn-primary'><i class='bi bi-arrow-right-circle'></i> Acceder</a>
-                        </div>
-                    </div>
-                  </div>";
-
-            echo "<div class='col'>
-                    <div class='card'>
-                        <div class='card-paciente icon-container text-center'>
-                            <i class='bi bi-file-earmark-text-fill role-icon'></i>
-                        </div>
-                        <div class='card-body card-body-white text-center'>
-                            <h5 class='card-title'>Mis Documentos.---xxxx</h5>
-                            <p class='card-text'>Acceder a documentos médicos</p>
-                            <a href='../moduloMisDocumentos/indexMisDocumentos.php' class='btn btn-primary'><i class='bi bi-arrow-right-circle'></i> Acceder</a>
-                        </div>
-                    </div>
-                  </div>";
-                  
-            echo "<div class='col'>
-                    <div class='card'>
-                        <div class='card-paciente icon-container text-center'>
-                            <i class='bi bi-receipt role-icon'></i>
-                        </div>
-                        <div class='card-body card-body-white text-center'>
-                            <h5 class='card-title'>Mis Citas Programadas</h5>
-                            <p class='card-text'>citas programadas con el medico respectivo</p>
                             <a href='../modeloRol/paciente/citas/indexCitas.php' class='btn btn-primary'><i class='bi bi-arrow-right-circle'></i> Acceder</a>
                         </div>
                     </div>
                   </div>";
                   
-            echo "<div class='col'>
-                    <div class='card'>
-                        <div class='card-paciente icon-container text-center'>
-                            <i class='bi bi-person-circle role-icon'></i>
-                        </div>
-                        <div class='card-body card-body-white text-center'>
-                            <h5 class='card-title'>Mi Perfil</h5>
-                            <p class='card-text'>Actualizar información personal</p>
-                            <a href='../modeloRol/paciente/perfil/indexPerfil.php' class='btn btn-primary'><i class='bi bi-arrow-right-circle'></i> Acceder</a>
-                        </div>
-                    </div>
-                  </div>";
             
-            echo "</div>";
+               
 
+          
         } elseif ($rol == 'Cajero') {
             echo "<h3 class='section-title'><i class='bi bi-cash-stack'></i> Gestión de Caja</h3>";
             echo "<div class='row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4'>";

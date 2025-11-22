@@ -1,105 +1,95 @@
 <?php
-
+// C:\...\editarExamenEntrada\formExamenEditar.php
 include_once('../../../../shared/pantalla.php');
-include_once("../../../modelo/ExamenClinicoDAO.php");
-include_once('../../../../shared/mensajeSistema.php');
+include_once("../../../../modelo/ExamenClinicoDAO.php");
 
-class formEditarPacienteHospitalizado extends pantalla
+class formExamenEditar extends pantalla
 {
-    public function formEditarPacienteHospitalizadoShow()
+    public function formExamenEditarShow()
     {
-        $this->cabeceraShow('Editar Evolución Clínica');
+        $this->cabeceraShow('Editar Examen Clínico');
 
-        $idSeguimiento = isset($_GET['id']) ? (int)$_GET['id'] : null;
-        $objMensaje = new mensajeSistema();
+        // Obtener el ID del examen a editar
+        $examenId = $_GET['id'] ?? null;
 
-        if (!$idSeguimiento) {
-            $objMensaje->mensajeSistemaShow("ID de registro de seguimiento no proporcionado para edición.", "../indexEvolucionClinicaPacienteHospitalizado.php", "error");
+        if (!$examenId) {
+            echo '<div class="alert alert-danger" role="alert">Error: ID de Examen no proporcionado.</div>';
+            $this->pieShow();
             return;
         }
 
-        $objSeguimiento = new ExamenClinicoDAO();
-        $objAuxiliar = new ExamenCLinicoDAO();
+        $objExamenDAO = new ExamenClinicoDAO();
+        $examen = $objExamenDAO->obtenerExamenPorId($examenId);
 
-        // 1. Obtener el registro a editar
-        $seguimiento = $objSeguimiento->obtenerSeguimientoPorId($idSeguimiento);
-        
-        if (!$seguimiento) {
-            $objMensaje->mensajeSistemaShow("Registro de seguimiento no encontrado. ID: $idSeguimiento.", "../indexEvolucionClinicaPacienteHospitalizado.php", "error");
+        if (!$examen) {
+            echo '<div class="alert alert-danger" role="alert">Error: Examen no encontrado.</div>';
+            $this->pieShow();
             return;
         }
 
-        // 2. Obtener listas auxiliares
-        $internados = $objAuxiliar->obtenerInternadosActivosConNombrePaciente();
-        $medicos = $objAuxiliar->obtenerMedicosActivos();
-        $enfermeros = $objAuxiliar->obtenerEnfermerosActivos();
+        // Obtener listas para los dropdowns
+        $historias = $objExamenDAO->obtenerHistoriasClinicasConNombrePaciente();
+        $enfermeros = $objExamenDAO->obtenerEnfermerosActivos();
+
 ?>
 <div class="container mt-4">
     <div class="card shadow">
         <div class="card-header bg-warning text-white text-center">
-            <h4><i class="bi bi-pencil-fill me-2"></i>Actualizar Evolución Clínica (ID: <?php echo htmlspecialchars($seguimiento['id_seguimiento']); ?>)</h4>
+            <h4><i class="bi bi-pencil-square me-2"></i>Editar Examen Clínico de Entrada</h4>
         </div>
         <div class="card-body">
-            <form action="./getEditaraPacienteHospitazado.php" method="POST">
-                
-                <input type="hidden" name="idSeguimiento" value="<?php echo htmlspecialchars($seguimiento['id_seguimiento']); ?>">
+            <form action="./getExamenEditar.php" method="POST">
+                <input type="hidden" name="examen_id" value="<?php echo htmlspecialchars($examen['examen_id']); ?>">
                 
                 <div class="mb-3">
-                    <label for="idInternado" class="form-label">Paciente Hospitalizado:</label>
-                    <select class="form-select" id="idInternado" name="idInternado" required>
-                        <option value="">-- Seleccione un Paciente (Internado Activo) --</option>
-                        <?php foreach ($internados as $internado) { 
-                            $selected = ($internado['id_internado'] == $seguimiento['id_internado']) ? 'selected' : '';
+                    <label for="historia_clinica_id" class="form-label">Paciente / Historia Clínica:</label>
+                    <select class="form-select" id="historia_clinica_id" name="historia_clinica_id" required>
+                        <option value="">-- Seleccione el Paciente (Historia Clínica) --</option>
+                        <?php foreach ($historias as $hc) { 
+                            $selected = ($hc['historia_clinica_id'] == $examen['historia_clinica_id']) ? 'selected' : '';
                         ?>
-                            <option value="<?php echo htmlspecialchars($internado['id_internado']); ?>" <?php echo $selected; ?>>
-                                <?php echo htmlspecialchars("ID Internado: {$internado['id_internado']} - {$internado['nombre_completo']}"); ?>
+                            <option value="<?php echo htmlspecialchars($hc['historia_clinica_id']); ?>" <?php echo $selected; ?>>
+                                <?php echo htmlspecialchars("HC: {$hc['historia_clinica_id']} - Paciente: {$hc['nombre_completo']}"); ?>
                             </option>
                         <?php } ?>
                     </select>
                 </div>
                 
                 <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="idMedico" class="form-label">Médico Tratante:</label>
-                        <select class="form-select" id="idMedico" name="idMedico" required>
-                            <option value="">-- Seleccione un Médico --</option>
-                            <?php foreach ($medicos as $medico) { 
-                                $selected = ($medico['id_usuario'] == $seguimiento['id_medico']) ? 'selected' : '';
-                            ?>
-                                <option value="<?php echo htmlspecialchars($medico['id_usuario']); ?>" <?php echo $selected; ?>>
-                                    <?php echo htmlspecialchars("{$medico['nombre']} {$medico['apellido_paterno']}"); ?>
-                                </option>
-                            <?php } ?>
-                        </select>
+                    <div class="col-md-4 mb-3">
+                        <label for="peso" class="form-label">Peso (kg):</label>
+                        <input type="number" step="0.01" class="form-control" id="peso" name="peso" 
+                               value="<?php echo htmlspecialchars($examen['peso']); ?>" required min="0.1" max="500">
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="idEnfermera" class="form-label">Enfermera (Opcional):</label>
-                        <select class="form-select" id="idEnfermera" name="idEnfermera">
-                            <option value="">-- Seleccione una Enfermera --</option>
-                            <?php foreach ($enfermeros as $enfermero) { 
-                                $selected = ($enfermero['id_usuario'] == $seguimiento['id_enfermera']) ? 'selected' : '';
-                            ?>
-                                <option value="<?php echo htmlspecialchars($enfermero['id_usuario']); ?>" <?php echo $selected; ?>>
-                                    <?php echo htmlspecialchars("{$enfermero['nombre']} {$enfermero['apellido_paterno']}"); ?>
-                                </option>
-                            <?php } ?>
-                        </select>
+                    <div class="col-md-4 mb-3">
+                        <label for="talla" class="form-label">Talla (m):</label>
+                        <input type="number" step="0.01" class="form-control" id="talla" name="talla" 
+                               value="<?php echo htmlspecialchars($examen['talla']); ?>" required min="0.1" max="3.0">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="pulso" class="form-label">Pulso:</label>
+                        <input type="text" class="form-control" id="pulso" name="pulso" 
+                               value="<?php echo htmlspecialchars($examen['pulso']); ?>" required maxlength="20">
                     </div>
                 </div>
 
                 <div class="mb-3">
-                    <label for="evolucion" class="form-label">Evolución Clínica:</label>
-                    <textarea class="form-control" id="evolucion" name="evolucion" rows="5" required><?php echo htmlspecialchars($seguimiento['evolucion']); ?></textarea>
-                </div>
-                
-                <div class="mb-3">
-                    <label for="tratamiento" class="form-label">Tratamiento/Indicaciones:</label>
-                    <textarea class="form-control" id="tratamiento" name="tratamiento" rows="5"><?php echo htmlspecialchars($seguimiento['tratamiento']); ?></textarea>
+                    <label for="id_enfermero" class="form-label">Enfermero que registra (Opcional):</label>
+                    <select class="form-select" id="id_enfermero" name="id_enfermero">
+                        <option value="">-- Seleccione una Enfermera/o --</option>
+                        <?php foreach ($enfermeros as $enfermero) { 
+                            $selected = ($enfermero['id_usuario'] == $examen['id_enfermero']) ? 'selected' : '';
+                        ?>
+                            <option value="<?php echo htmlspecialchars($enfermero['id_usuario']); ?>" <?php echo $selected; ?>>
+                                <?php echo htmlspecialchars("{$enfermero['nombre']} {$enfermero['apellido_paterno']}"); ?>
+                            </option>
+                        <?php } ?>
+                    </select>
                 </div>
 
-                <div class="d-grid gap-2 mt-4">
-                    <button type="submit" class="btn btn-warning text-white"><i class="bi bi-arrow-repeat me-2"></i>Actualizar Evolución</button>
-                    <a href="../indexEvolucionClinicaPacienteHospitalizado.php" class="btn btn-secondary">Cancelar y Volver</a>
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-warning"><i class="bi bi-check-lg me-2"></i>Guardar Cambios</button>
+                    <a href="../indexExamenEntrada.php" class="btn btn-secondary">Cancelar</a>
                 </div>
             </form>
         </div>

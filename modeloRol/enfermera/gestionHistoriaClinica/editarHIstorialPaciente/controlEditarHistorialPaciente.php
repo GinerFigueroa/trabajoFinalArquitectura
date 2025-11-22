@@ -1,47 +1,60 @@
 <?php
-// Fichero: gestionHistoriaClinica/editarHistorialPaciente/controlEditarHistorialPaciente.php
-
+// C:\...\editarHistorialPaciente\controlEditarHistorialPaciente.php
 include_once('../../../../modelo/HistoriaClinicaDAO.php');
 include_once('../../../../shared/mensajeSistema.php');
 
 class controlEditarHistorialPaciente
 {
-    private $objDAO;
+    private $objHistoriaDAO;
     private $objMensaje;
 
     public function __construct()
     {
-        $this->objDAO = new HistoriaClinicaDAO();
+        $this->objHistoriaDAO = new HistoriaClinicaDAO(); 
         $this->objMensaje = new mensajeSistema();
     }
 
-    public function obtenerHistoriaParaEdicion($historiaClinicaId)
-    {
-        return $this->objDAO->obtenerHistoriaPorId($historiaClinicaId);
-    }
-    
     public function editarHistoria($datos)
     {
-        $hcId = (int)($datos['historia_clinica_id'] ?? 0);
-        $idPac = (int)($datos['id_paciente'] ?? 0); 
-        $drId = (int)($datos['dr_tratante_id'] ?? 0);
-        $fecha = $datos['fecha_creacion'] ?? date('Y-m-d');
+        $historiaClinicaId = (int)($datos['historia_clinica_id'] ?? 0);
+        $idPaciente = (int)($datos['id_paciente'] ?? 0);
+        $drTratanteId = (int)($datos['dr_tratante_id'] ?? 0);
+        $fechaCreacion = $datos['fecha_creacion'] ?? '';
         
-        if (empty($hcId) || empty($idPac) || empty($drId)) {
-            $this->objMensaje->mensajeSistemaShow("Faltan datos obligatorios para editar la Historia Clínica.", 
-                "../indexHistoriaClinica.php", 'error');
+        $urlRetorno = './indexEditarHistorialPaciente.php?id=' . $historiaClinicaId;
+
+        // Validaciones
+        if (empty($historiaClinicaId) || empty($idPaciente) || empty($drTratanteId) || empty($fechaCreacion)) {
+            $this->objMensaje->mensajeSistemaShow("Todos los campos son obligatorios.", $urlRetorno, 'error');
             return;
         }
 
-        $resultado = $this->objDAO->editarHistoria($hcId, $idPac, $drId, $fecha);
-        
+        // Validar formato de fecha
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $fechaCreacion)) {
+            $this->objMensaje->mensajeSistemaShow("Formato de fecha inválido.", $urlRetorno, 'error');
+            return;
+        }
+
+        // Ejecutar la edición
+        $resultado = $this->objHistoriaDAO->editarHistoria(
+            $historiaClinicaId, 
+            $idPaciente, 
+            $drTratanteId, 
+            $fechaCreacion
+        );
+
         if ($resultado) {
-            $this->objMensaje->mensajeSistemaShow("Historia Clínica N° $hcId actualizada correctamente.", 
-                '../indexHistoriaClinica.php', 'success');
+            $this->objMensaje->mensajeSistemaShow(
+                'Historia Clínica actualizada correctamente.', 
+                '../indexHistoriaClinica.php', 
+                'success'
+            );
         } else {
-            // El mensaje de error ahora es más genérico, ya que el select previene el error 24.
-            $this->objMensaje->mensajeSistemaShow("Error al actualizar la Historia Clínica o no se detectaron cambios.", 
-                "./indexEditarHistorialPaciente.php?id=" . $hcId, 'error');
+            $this->objMensaje->mensajeSistemaShow(
+                'Error al actualizar la Historia Clínica. Verifique los datos.', 
+                $urlRetorno, 
+                'error'
+            );
         }
     }
 }

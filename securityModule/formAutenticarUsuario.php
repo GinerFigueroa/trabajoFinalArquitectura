@@ -53,12 +53,11 @@ class formAutenticarUsuario extends pantalla
                         </div>
                         
                         <div class="text-center mt-3">
-                            <a href="../modeloRol/administrador/recuperacionPPasword/indexRecuperarPasword.php" class="text-decoration-none">
-                                <i class="bi bi-question-circle me-1"></i>¿Olvidó su contraseña?
-                            </a>
-                                <a href="../modeloRol/administrador/recuperacionPassword/indexRecuperacionPassword.php" class="text-decoration-none">
-                                <i class="bi bi-question-circle me-1"></i>¿Olvidó su contraseña?
-                            </a>
+                            <div class="text-center mt-3">
+                                <a href="../modeloRol/administrador/recuperacionPorTelegram/indexRecuperarPasword.php" class="text-decoration-none">
+                                    <i class="bi bi-question-circle me-1"></i>¿Olvidó su contraseña?
+                                </a>
+                            </div>
 
                             
                         </div>

@@ -265,5 +265,6 @@ class ExamenClinicoDAO
         }
         return $enfermeros;
     }
+    
 }
 ?>

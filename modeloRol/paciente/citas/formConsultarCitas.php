@@ -45,11 +45,7 @@ class formConsultarCitas extends pantalla
                             <p class="mb-1">DNI: <?php echo htmlspecialchars($infoPaciente['dni']); ?></p>
                             <p class="mb-0">Teléfono: <?php echo htmlspecialchars($infoPaciente['telefono']); ?></p>
                         </div>
-                        <div class="col-md-4 text-end">
-                            <a href="../solicitarCita/indexSolicitarCita.php" class="btn btn-light btn-lg">
-                                <i class="bi bi-plus-circle"></i> Solicitar Nueva Cita
-                            </a>
-                        </div>
+                       
                     </div>
                 </div>
             </div>

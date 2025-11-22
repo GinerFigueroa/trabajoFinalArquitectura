@@ -1,6 +1,8 @@
 <?php
+// C:\...\editarExamenEntrada\indexExamenEditar.php
+session_start();
 
-include_once('./formEditarPacienteHospitalizado.php');
-$obj = new formEditarPacienteHospitalizado();
-$obj->formEditarPacienteHospitalizadoShow();
+include_once('./formExamenEditar.php');
+$obj = new formExamenEditar();
+$obj->formExamenEditarShow();
 ?>

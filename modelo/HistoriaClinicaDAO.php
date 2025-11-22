@@ -303,31 +303,41 @@ public function obtenerNombreCompletoUsuario($idUsuario)
  * @param int $idEnfermero
  * @return array
  */
+/**
+ * Obtiene TODAS las historias clínicas para el rol de Enfermero
+ * (Los enfermeros pueden ver todas las historias, no solo las asignadas a ellos)
+ * @param int $idEnfermero (se mantiene por compatibilidad, pero no se usa en el filtro)
+ * @return array
+ */
 public function obtenerHistoriasPorEnfermero($idEnfermero)
 {
-    $sql = "SELECT hc.historia_clinica_id, hc.id_paciente, hc.dr_tratante_id, hc.fecha_creacion,
-                   u.nombre, u.apellido_paterno, u.apellido_materno, 
-                   rm.motivo_consulta 
+    $sql = "SELECT 
+                hc.historia_clinica_id, 
+                hc.id_paciente, 
+                hc.dr_tratante_id, 
+                hc.fecha_creacion,
+                u.nombre, 
+                u.apellido_paterno, 
+                u.apellido_materno, 
+                rm.motivo_consulta,
+                -- Agregar nombre del tratante para mostrar en la lista
+                CONCAT(ut.nombre, ' ', ut.apellido_paterno) as nombre_tratante
             FROM historia_clinica hc
             INNER JOIN pacientes p ON hc.id_paciente = p.id_paciente
             INNER JOIN usuarios u ON p.id_usuario = u.id_usuario
+            INNER JOIN usuarios ut ON hc.dr_tratante_id = ut.id_usuario  -- JOIN para ver quién es el tratante
             LEFT JOIN registro_medico rm ON hc.historia_clinica_id = rm.historia_clinica_id
-            WHERE hc.dr_tratante_id = ? 
-            ORDER BY hc.fecha_creacion DESC";
+            ORDER BY hc.fecha_creacion DESC, hc.historia_clinica_id DESC";
 
     $stmt = $this->connection->prepare($sql);
     
     if (!$stmt) {
-        // ERROR: La consulta SQL tiene un error (columna, tabla, sintaxis). 
-        // ¡REVISA LA CONSULTA ARRIBA!
         error_log("Fallo al preparar SQL: " . $this->connection->error);
         return [];
     }
     
-    $stmt->bind_param("i", $idEnfermero);
-    
+    // NOTA: Ya no usamos bind_param porque no hay parámetros WHERE
     if (!$stmt->execute()) {
-        // ERROR: El bind_param falló o la ejecución falló por alguna razón.
         error_log("Fallo al ejecutar la consulta: " . $stmt->error);
         return [];
     }
@@ -342,8 +352,11 @@ public function obtenerHistoriasPorEnfermero($idEnfermero)
         }
     }
     $stmt->close();
+    
+    error_log("DEBUG: Enfermero ID $idEnfermero - Se encontraron " . count($historias) . " historias");
     return $historias;
 }
+
 
 }
 ?>

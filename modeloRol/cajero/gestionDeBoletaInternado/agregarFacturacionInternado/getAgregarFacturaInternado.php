@@ -10,7 +10,7 @@ $objControl = new controlAgregarFacturaInternado();
 $objMensaje = new mensajeSistema();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    $objMensaje->mensajeSistemaShow("Acceso no autorizado.", "../../indexFacturacionInternado.php", "error");
+    $objMensaje->mensajeSistemaShow("Acceso no autorizado.", "../indexFacturacionInternadoPDF.php", "error");
     exit();
 }
 

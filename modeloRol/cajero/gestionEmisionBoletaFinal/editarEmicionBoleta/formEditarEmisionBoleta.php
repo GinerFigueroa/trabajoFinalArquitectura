@@ -42,7 +42,7 @@ class formEditarEmisionBoleta extends pantalla
             <h4><i class="bi bi-pencil-square me-2"></i>Editar Comprobante #<?php echo htmlspecialchars($idBoleta); ?> (Orden #<?php echo htmlspecialchars($boleta['id_orden']); ?>)</h4>
         </div>
         <div class="card-body">
-            <form action="./getEditarEmisionBoleta.php" method="POST">
+            <form action="./getEmisionBoleta.php" method="POST">
                 <input type="hidden" name="id_boleta" value="<?php echo htmlspecialchars($idBoleta); ?>">
                 
                 <div class="alert alert-info">

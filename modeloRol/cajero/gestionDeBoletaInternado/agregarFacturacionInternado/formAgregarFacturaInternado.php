@@ -12,7 +12,7 @@ class formAgregarFacturaInternado extends pantalla
         $listaInternados = $objAuxiliarDAO->obtenerInternadosParaFacturar();
         $estadosFactura = $objAuxiliarDAO::obtenerEstadosFactura();
 
-        $urlVolver = "../../indexFacturacionInternado.php";
+        $urlVolver = "../indexFacturacionInternadoPDF.php";
 
         $this->cabeceraShow("Generar Nueva Factura de Internado");
 ?>

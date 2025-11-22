@@ -66,7 +66,7 @@ class formEmisionBoletaFinal extends pantalla
                                                 <i class="bi bi-file-earmark-text-fill me-2"></i>
                                             </a>
 
-                                           <a href="./editarEmisionBoleta/indexEditarEmisionBoleta.php?id=<?php echo htmlspecialchars($boleta['id_boleta']); ?>" 
+                                           <a href="./editarEmicionBoleta/idexEditarEmisionBoleta.php?id=<?php echo htmlspecialchars($boleta['id_boleta']); ?>" 
                                            class="btn btn-sm btn-warning" title="Editar Boleta">
                                             <i class="bi bi-pencil-fill"></i>
                                         </a>

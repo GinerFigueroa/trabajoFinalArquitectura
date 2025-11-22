@@ -19,7 +19,7 @@ class controlEditarFacturacionInternado
         $idFactura, $idInternado, $fechaEmision, $diasInternado, $costoHabitacion, 
         $costoTratamientos, $costoMedicamentos, $costoOtros, $total, $estado)
     {
-        $urlRedireccion = "../indexFacturacionInternado.php";
+        $urlRedireccion = "../indexFacturacionInternadoPDF.php";
         $urlError = "./indexEditarFacturacionInternado.php?id={$idFactura}";
 
         // Validación de datos numéricos y estado

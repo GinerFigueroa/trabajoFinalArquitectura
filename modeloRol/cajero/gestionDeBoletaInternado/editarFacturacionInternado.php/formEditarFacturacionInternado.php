@@ -17,7 +17,7 @@ class formEditarFacturacionInternado extends pantalla
         $estadosFactura = $objAuxiliarDAO::obtenerEstadosFactura();
         $infoInternado = $factura ? $objAuxiliarDAO->obtenerInfoInternado($factura['id_internado']) : null;
         
-        $urlVolver = "../indexFacturacionInternado.php";
+        $urlVolver = "../indexFacturacionInternadoPDF.php";
 
         if (!$factura || !$infoInternado) {
             $this->cabeceraShow("Error");

@@ -19,7 +19,7 @@ class controlAgregarFacturaInternado
         $idInternado, $fechaEmision, $diasInternado, $costoHabitacion, 
         $costoTratamientos, $costoMedicamentos, $costoOtros, $total, $estado)
     {
-        $urlExito = "../indexFacturacionInternado.php";
+        $urlExito = "../indexFacturacionInternadoPDF.php";
         $urlError = "./indexAgregarFacturaInternado.php";
 
         // Validación de datos numéricos y estado
