@@ -1,26 +1,31 @@
 <?php
+
 include_once('../../../../shared/pantalla.php');
 include_once('../../../../modelo/ConsentimientoInformadoDAO.php');
 
+/**
+ * Patrón: TEMPLATE METHOD 🧱
+ * Hereda de la clase 'pantalla' para definir el esqueleto de la vista.
+ */
 class formEditarConsentimientoInformado extends pantalla
 {
+    // Método: `formEditarConsentimientoInformadoShow` (Método del Template: Esqueleto de la página)
     public function formEditarConsentimientoInformadoShow()
     {
+        // TEMPLATE METHOD: Paso 1 - Cabecera
         $this->cabeceraShow('Editar Consentimiento Informado');
 
+        // Lógica de obtención de datos para la vista
         $idConsentimiento = $_GET['id'] ?? null;
 
-        if (!$idConsentimiento) {
-            echo '<div class="alert alert-danger" role="alert">ID de Consentimiento no proporcionado.</div>';
-            $this->pieShow();
-            return;
-        }
-
         $objDAO = new ConsentimientoInformadoDAO();
+        // Método: `obtenerConsentimientoPorId`
         $consentimiento = $objDAO->obtenerConsentimientoPorId($idConsentimiento);
-
-        if (!$consentimiento) {
-            echo '<div class="alert alert-danger" role="alert">Consentimiento Informado no encontrado.</div>';
+        
+        // Manejo de errores simplificado en la vista (Hook)
+        if (!$idConsentimiento || !$consentimiento) {
+            $errorMsg = !$idConsentimiento ? 'ID de Consentimiento no proporcionado.' : 'Consentimiento Informado no encontrado.';
+            echo '<div class="alert alert-danger" role="alert">' . $errorMsg . '</div>';
             $this->pieShow();
             return;
         }
@@ -66,6 +71,7 @@ class formEditarConsentimientoInformado extends pantalla
 </div>
 
 <?php
+        // TEMPLATE METHOD: Paso 2 - Pie
         $this->pieShow();
     }
 }

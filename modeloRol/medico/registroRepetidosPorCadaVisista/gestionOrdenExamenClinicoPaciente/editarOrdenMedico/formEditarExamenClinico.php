@@ -1,26 +1,44 @@
 <?php
+
 include_once('../../../../../shared/pantalla.php');
 include_once('../../../../../modelo/OrdenExamenDAO.php');
 
+/**
+ * Patrón: TEMPLATE METHOD 🧱
+ * Clase Concreta que hereda el esqueleto de la página.
+ */
 class formEditarExamenClinico extends pantalla
 {
+    // Atributo: $objDAO
+    private $objDAO;
+
+    // Método: Constructor
+    public function __construct() {
+        // La inicialización del DAO puede hacerse en el Template o en el método Show.
+        // La dejo aquí para coherencia con la implementación previa.
+        $this->objDAO = new OrdenExamenDAO();
+    }
+
+    // Método: formEditarExamenClinicoShow (Método del Template: Esqueleto de la página)
     public function formEditarExamenClinicoShow()
     {
+        // TEMPLATE METHOD: Paso 1 - Método Primitivo (Cabecera)
         $this->cabeceraShow("Editar Orden de Examen");
 
-        // Validar que se proporcionó el ID de la orden
+        // TEMPLATE METHOD: Paso 2 - Lógica de pre-carga y validación de entrada
         if (!isset($_GET['id_orden']) || !is_numeric($_GET['id_orden'])) {
             include_once('../../../../../shared/mensajeSistema.php');
             $objMensaje = new mensajeSistema();
             $objMensaje->mensajeSistemaShow("ID de orden no válido", "../indexOrdenExamenClinico.php", "error");
+            // TEMPLATE METHOD: El pieShow no se llama si hay error crítico
             return;
         }
 
         $idOrden = (int)$_GET['id_orden'];
-        $objDAO = new OrdenExamenDAO();
         
         // Obtener la orden específica
-        $orden = $objDAO->obtenerOrdenPorId($idOrden);
+        // Atributo: $orden (Datos del Modelo)
+        $orden = $this->objDAO->obtenerOrdenPorId($idOrden);
         
         if (!$orden) {
             include_once('../../../../../shared/mensajeSistema.php');
@@ -29,8 +47,9 @@ class formEditarExamenClinico extends pantalla
             return;
         }
 
-        // Obtener datos para los selects (solo historias clínicas, no médicos)
-        $historiasClinicas = $objDAO->obtenerHistoriasClinicas();
+        // Obtener datos para los selects (historias clínicas)
+        // Atributo: $historiasClinicas
+        $historiasClinicas = $this->objDAO->obtenerHistoriasClinicas();
 ?>
 <div class="container mt-4">
     <div class="card shadow">
@@ -41,7 +60,6 @@ class formEditarExamenClinico extends pantalla
             <form action="./getEditarExamenClinico.php" method="POST">
                 <input type="hidden" name="id_orden" value="<?php echo htmlspecialchars($orden['id_orden']); ?>">
                 
-                <!-- Información de solo lectura -->
                 <div class="row mb-4">
                     <div class="col-md-6">
                         <div class="card bg-light">
@@ -141,6 +159,7 @@ class formEditarExamenClinico extends pantalla
     </div>
 </div>
 <?php
+        // TEMPLATE METHOD: Paso 4 - Método Primitivo (Pie)
         $this->pieShow();
     }
 }

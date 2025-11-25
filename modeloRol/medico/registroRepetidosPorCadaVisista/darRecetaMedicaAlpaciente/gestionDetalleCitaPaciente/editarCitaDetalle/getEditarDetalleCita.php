@@ -1,12 +1,17 @@
+
 <?php
+// Directorio: /controlador/gestionDetalleCitaPaciente/getEditarDetalleCita.php
+
 session_start();
 include_once('../../../../../../shared/mensajeSistema.php');
+// Se sigue incluyendo el Mediator
 include_once('./controlEditarDetalleCita.php');
 
 $objMensaje = new mensajeSistema();
+// Atributo: $objControl (El Mediator)
 $objControl = new controlEditarDetalleCita();
 
-// Verificar que el usuario tenga sesión activa y sea médico
+// Verificar que el usuario tenga sesión activa y sea médico (Lógica de acceso)
 if (!isset($_SESSION['login']) || $_SESSION['rol_id'] != 2) {
     $objMensaje->mensajeSistemaShow(
         '❌ Acceso denegado. Solo el personal médico puede editar detalles de recetas.', 
@@ -16,39 +21,25 @@ if (!isset($_SESSION['login']) || $_SESSION['rol_id'] != 2) {
     exit();
 }
 
-// Manejo del formulario de edición
+// ----------------------------------------------------
+// CAMBIO CLAVE: Recolección de datos y llamada al Mediator
+// ----------------------------------------------------
 if (isset($_POST['btnEditar'])) {
-    // Recoger y validar datos del formulario
-    $idDetalle = $_POST['idDetalle'] ?? null;
-    $medicamento = $_POST['medicamento'] ?? '';
-    $dosis = $_POST['dosis'] ?? '';
-    $frecuencia = $_POST['frecuencia'] ?? '';
-    $duracion = $_POST['duracion'] ?? null;
-    $notas = $_POST['notas'] ?? null;
-
-    // Validaciones básicas
-    if (empty($idDetalle) || empty($medicamento) || empty($dosis) || empty($frecuencia)) {
-        $objMensaje->mensajeSistemaShow(
-            '❌ Todos los campos marcados con * son obligatorios.', 
-            './indexEditarDetalleCita.php?id=' . $idDetalle, 
-            'error'
-        );
-        exit();
-    }
-
-    // Validar que el detalle existe y pertenece al médico
-    $idUsuarioMedico = $_SESSION['id_usuario'];
-    if (!$objControl->obtenerDetalle($idDetalle)) {
-        $objMensaje->mensajeSistemaShow(
-            '❌ El detalle de receta no existe.', 
-            '../indexDetalleCita.php', 
-            'error'
-        );
-        exit();
-    }
-
-    // Llamar al controlador para procesar la edición
-    $objControl->editarDetalle($idDetalle, $medicamento, $dosis, $frecuencia, $duracion, $notas);
+    $data = [
+        'action'        => 'editar', // Definimos la acción
+        'idDetalle'     => $_POST['idDetalle'] ?? null,
+        'medicamento'   => $_POST['medicamento'] ?? '',
+        'dosis'         => $_POST['dosis'] ?? '',
+        'frecuencia'    => $_POST['frecuencia'] ?? '',
+        'duracion'      => $_POST['duracion'] ?? null,
+        'notas'         => $_POST['notas'] ?? null,
+        'idUsuarioMedico' => $_SESSION['id_usuario'] ?? null, // Pasamos el ID del médico logueado
+    ];
+    
+    // MEDIATOR: Invoca el método coordinador con la acción y los datos.
+    // El Mediador asume la responsabilidad de la validación de la lógica.
+    // Método: `ejecutarComando`
+    $objControl->ejecutarComando('editar', $data);
 
 } else {
     // Acceso directo no permitido

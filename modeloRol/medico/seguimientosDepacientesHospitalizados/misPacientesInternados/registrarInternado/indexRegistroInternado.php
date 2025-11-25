@@ -1,5 +1,7 @@
 <?php
 include_once('./formRegistroInternado.php');
-$obj = new formRegistroInternado();
+
+// Patrón FACTORY SIMPLE (Implicitamente) para crear la instancia de la vista
+$obj = new formRegistroInternado(); 
 $obj->formRegistroInternadoShow();
 ?>

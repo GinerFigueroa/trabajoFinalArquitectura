@@ -3,9 +3,9 @@
 include_once('../../../../modelo/UsuarioDAO.php');
 include_once('../../../../shared/mensajeSistema.php');
 
-class controlRegistroUsuario // MEDIATOR
+class controlRegistroUsuario // MEDIATOR / COMMAND
 {
-    private $objUsuarioDAO; // Receives the COMMAND
+    private $objUsuarioDAO; // Receiver del COMMAND
     private $objMensaje;
     private $estadoRegistro = 'Pendiente'; // Emulación de STATE
 
@@ -15,72 +15,101 @@ class controlRegistroUsuario // MEDIATOR
         $this->objMensaje = new mensajeSistema();
     }
 
-    // Emulación del patrón FACTORY METHOD: Crea la clave hasheada
-    private function createHashedPassword($clave) {
+    /**
+     * Patrón: FACTORY METHOD 🏭
+     * Crea un hash de la clave para almacenamiento seguro.
+     */
+    private function createHashedPassword(string $clave): string {
         return password_hash($clave, PASSWORD_DEFAULT);
     }
     
-    // Emulación del patrón STATE
-    private function setEstadoRegistro($estado) {
+    // Patrón: STATE (Método de control)
+    private function setEstadoRegistro(string $estado) {
         $this->estadoRegistro = $estado;
     }
 
-    // Emulación del patrón CHAIN OF RESPONSIBILITY: Valida la complejidad y unicidad
-    private function validarRegistroChain($login, $email, $telefono, $clave)
+    /**
+     * Patrón: CHAIN OF RESPONSIBILITY (Validaciones de unicidad y complejidad) 🔗
+     * Ejecuta una serie de validaciones secuenciales que deben cumplirse.
+     * @return true|string Retorna TRUE si todas las validaciones son exitosas, o un mensaje de error (string).
+     */
+    private function validarRegistroChain(string $login, string $email, string $telefono, string $clave): true|string
     {
         $this->setEstadoRegistro('ValidandoClave');
+
+        // Validación 1: Complejidad y longitud de la clave
         if (strlen($clave) < 8) {
-            return "La clave debe tener al menos 8 caracteres. (CHAIN: Longitud)";
+            return "La clave debe tener al menos 8 caracteres.";
         }
         if (!preg_match('/[0-9]/', $clave) || !preg_match('/[a-zA-Z]/', $clave)) {
-             return "La clave debe contener letras y números. (CHAIN: Complejidad)";
+             return "La clave debe contener letras y números.";
         }
         
         $this->setEstadoRegistro('ValidandoUnicidad');
+
+        // Validación 2: Unicidad del nombre de usuario
         if ($this->objUsuarioDAO->validarCampoUnico('usuario_usuario', $login)) {
-            return "El nombre de usuario '{$login}' ya está en uso. (CHAIN: Usuario Único)";
-        }
-        if ($this->objUsuarioDAO->validarCampoUnico('email', $email)) {
-            return "El email '{$email}' ya está en uso. (CHAIN: Email Único)";
-        }
-        if ($this->objUsuarioDAO->validarCampoUnico('telefono', $telefono)) {
-             return "El teléfono '{$telefono}' ya está en uso. (CHAIN: Teléfono Único)";
+            return "El nombre de usuario '{$login}' ya está en uso.";
         }
         
+        // Validación 3: Unicidad del email
+        if ($this->objUsuarioDAO->validarCampoUnico('email', $email)) {
+            return "El email '{$email}' ya está en uso.";
+        }
+        
+        // Validación 4: Unicidad del teléfono
+        if ($this->objUsuarioDAO->validarCampoUnico('telefono', $telefono)) {
+             return "El teléfono '{$telefono}' ya está en uso.";
+        }
+        
+        // Todas las validaciones pasaron
         return true; 
     }
 
-    public function registrarUsuario($login, $nombre, $apellidoPaterno, $apellidoMaterno, $email, $telefono, $clave, $idRol, $activo) // COMMAND
+    /**
+     * Patrón: COMMAND (Método principal de registro) 🚀
+     * Coordina la validación, la creación de la clave y la delegación al DAO.
+     */
+    public function registrarUsuario(string $login, string $nombre, string $apellidoPaterno, ?string $apellidoMaterno, string $email, string $telefono, string $clave, int $idRol, int $activo)
     {
         $this->setEstadoRegistro('IniciandoRegistro');
+        $urlRetorno = '../indexGestionUsuario.php'; // URL a la lista de usuarios
         
         // 1. Ejecución del CHAIN OF RESPONSIBILITY
         $validacion = $this->validarRegistroChain($login, $email, $telefono, $clave);
         
         if ($validacion !== true) {
-            // Se usa './indexRegistroUsuario.php' para volver al formulario
-            $this->objMensaje->mensajeSistemaShow($validacion, '../indexGestionUsuario.php', 'systemOut', false);
+            // Error de validación: Volver al formulario de registro para corregir
+            $this->objMensaje->mensajeSistemaShow($validacion, './indexRegistroUsuario.php', 'error');
             return;
         }
 
-        // 2. Ejecución de la Acción (COMMAND)
+        // 2. Ejecución de la Acción: Preparación de datos
         $this->setEstadoRegistro('CreandoHash');
-        // Uso del FACTORY METHOD
-        $hashed_clave = $this->createHashedPassword($clave);
+        $hashed_clave = $this->createHashedPassword($clave); // Uso del FACTORY METHOD
 
+        // 3. Delegación al DAO (Receiver)
         $this->setEstadoRegistro('Guardando');
-        // Delegación al DAO (Receiver del COMMAND)
-        $resultado = $this->objUsuarioDAO->registrarUsuario($login, $nombre, $apellidoPaterno, $apellidoMaterno, $email, $telefono, $hashed_clave, $idRol, $activo);
+        $resultado = $this->objUsuarioDAO->registrarUsuario(
+            $login, $nombre, $apellidoPaterno, $apellidoMaterno, $email, $telefono, 
+            $hashed_clave, $idRol, $activo
+        );
 
-        // 3. Manejo de Respuesta
+        // 4. Manejo de Respuesta
         if ($resultado) {
             $this->setEstadoRegistro('Exito');
-            // Vuelve a la lista principal
-            $this->objMensaje->mensajeSistemaShow('Usuario registrado correctamente.', '../indexGestionUsuario.php', 'success');
+            $this->objMensaje->mensajeSistemaShow(
+                '✅ Usuario registrado correctamente.', 
+                $urlRetorno, 
+                'success'
+            );
         } else {
             $this->setEstadoRegistro('Fallo');
-             // Vuelve al formulario de registro
-            $this->objMensaje->mensajeSistemaShow('Error al registrar el usuario.', '../indexGestionUsuario.php', 'error');
+            $this->objMensaje->mensajeSistemaShow(
+                '❌ Error grave al registrar el usuario en la base de datos.', 
+                $urlRetorno, 
+                'error'
+            );
         }
     }
 }

@@ -1,18 +1,15 @@
 <?php
-// C:\...\gestionHistoriaClinica\getHistorialClinica.php
+
 session_start();
 
 include_once('../../../shared/mensajeSistema.php');
-include_once('./controlHistorialClinico.php');
+include_once('./controlHistorialClinico.php'); // Incluimos el Mediator
 
-$objControl = new controlHistorialClinico();
+$objControl = new controlHistorialClinico(); // El Mediator
 $objMensaje = new mensajeSistema();
 
-// Validar Médico Logueado
-if (!isset($_SESSION['id_usuario']) || $_SESSION['id_rol'] != 2) {
-    $objMensaje->mensajeSistemaShow("Debe iniciar sesión como Médico.", "../../../vista/login.php", "error"); 
-    exit();
-}
+
+
 $idMedicoLogueado = $_SESSION['id_usuario'];
 
 
@@ -20,14 +17,19 @@ $idMedicoLogueado = $_SESSION['id_usuario'];
 if (isset($_GET['action']) && $_GET['action'] == 'eliminar' && isset($_GET['id'])) {
     $idHistoria = $_GET['id'];
     
-    if (!is_numeric($idHistoria)) {
-        $objMensaje->mensajeSistemaShow("ID de Historia Clínica no válido.", "./indexHistoriaClinica.php", "error"); 
-    } else {
-        $objControl->eliminarHistoria((int)$idHistoria, $idMedicoLogueado);
-    }
+    // Recolección de datos
+    $data = [
+        'action' => 'eliminar',
+        'idHistoria' => $idHistoria,
+        'idMedico' => $idMedicoLogueado,
+    ];
+    
+    // MEDIATOR: Invoca el método coordinador con la acción y los datos.
+    $objControl->ejecutarComando('eliminar', $data);
+
 } else {
     // Si se accede sin acción válida
     header("Location: ./indexHistoriaClinica.php");
     exit();
 }
-?> 
+?>

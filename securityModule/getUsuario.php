@@ -1,8 +1,5 @@
 <?php
-/**
- * Patrón: Front Controller (Parcial)
- * Responsabilidad: Actuar como punto de entrada POST, realizar validación de entrada y delegar al Controlador.
- */
+
 session_start();
 
 /**

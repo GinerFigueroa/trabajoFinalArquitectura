@@ -1,4 +1,5 @@
 <?php
+
 session_start();
 include_once('../../../../../../shared/pantalla.php');
 include_once('../../../../../../modelo/RecetaDetalleDAO.php');
@@ -21,8 +22,9 @@ class formAgregarDetalleCita extends pantalla
             exit();
         }
 
+        // Obtención de recetas (PENDIENTE DE FILTRADO SEGURO POR EL MEDIATOR/CONTROLADOR)
         $objDetalle = new RecetaDetalleDAO();
-        $recetas = $objDetalle->obtenerRecetasMedicas();
+        $recetas = $objDetalle->obtenerRecetasMedicas(); // Esta llamada debería ser al Mediator para filtrar
         $nombreMedico = $_SESSION['login'] ?? 'Usuario no identificado';
 ?>
 
@@ -42,7 +44,6 @@ class formAgregarDetalleCita extends pantalla
             </div>
 
             <form action="./getAgregarDetalleCita.php" method="POST" id="formDetalle">
-                <!-- Selección de Receta -->
                 <div class="row mb-4">
                     <div class="col-md-12">
                         <label for="idReceta" class="form-label">Seleccionar Receta Médica *</label>
@@ -62,7 +63,6 @@ class formAgregarDetalleCita extends pantalla
                     </div>
                 </div>
 
-                <!-- Información del Medicamento -->
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label for="medicamento" class="form-label">Medicamento *</label>
@@ -114,15 +114,13 @@ class formAgregarDetalleCita extends pantalla
                     <div class="form-text">Información adicional importante sobre el medicamento</div>
                 </div>
 
-                <!-- Resumen de la Receta Seleccionada -->
                 <div class="card border-info mb-4" id="recetaInfo" style="display: none;">
                     <div class="card-header bg-info text-white">
                         <i class="bi bi-info-circle me-2"></i>
                         Información de la Receta Seleccionada
                     </div>
                     <div class="card-body" id="recetaInfoContent">
-                        <!-- La información se cargará dinámicamente -->
-                    </div>
+                        </div>
                 </div>
 
                 <div class="d-grid gap-2 mt-4">
@@ -239,4 +237,5 @@ function limpiarFormulario() {
         $this->pieShow();
     }
 }
+// Aquí termina formAgregarDetalleCita.php
 ?>

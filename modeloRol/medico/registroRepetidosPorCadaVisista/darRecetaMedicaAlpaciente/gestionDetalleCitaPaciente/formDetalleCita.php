@@ -5,11 +5,32 @@ include_once('../../../../../modelo/RecetaDetalleDAO.php');
 
 class formDetalleCita extends pantalla
 {
+    /**
+     * Verifica si el médico actual puede editar el detalle de la receta.
+     * Solo permite la edición/eliminación si la receta fue creada por el usuario logueado.
+     * @param int $idReceta ID de la Receta
+     * @return bool
+     */
+    private function puedeEditarDetalle($idReceta)
+    {
+        // Se asume que esta lógica existe en RecetaDetalleDAO para obtener el ID del médico que creó la receta
+        $objDetalle = new RecetaDetalleDAO();
+        $idUsuario = $_SESSION['id_usuario'] ?? null; // Usar null coalescing operator para seguridad
+        
+        // Se asume que esta función existe y devuelve el ID del usuario (médico) que generó la receta
+        // Si no se encuentra el ID, o el usuario no está logueado, se asume que no puede editar.
+        $idUsuarioReceta = $objDetalle->obtenerIdUsuarioPorIdReceta($idReceta);
+        
+        return $idUsuarioReceta == $idUsuario;
+    }
+    
     public function formDetalleCitaShow()
     {
         $this->cabeceraShow("Gestión de Detalles de Receta Médica");
 
-        // Verificar que el usuario sea médico
+        // ----------------------------------------------------
+        // 1. Verificación de Rol (Solo personal médico: rol_id = 2)
+        // ----------------------------------------------------
         if (!isset($_SESSION['rol_id']) || $_SESSION['rol_id'] != 2) {
             include_once('../../../shared/mensajeSistema.php');
             $objMensaje = new mensajeSistema();
@@ -20,7 +41,10 @@ class formDetalleCita extends pantalla
             );
             exit();
         }
-
+        
+        // ----------------------------------------------------
+        // 2. Obtención de Datos
+        // ----------------------------------------------------
         $objDetalle = new RecetaDetalleDAO();
         $listaDetalles = $objDetalle->obtenerTodosDetalles();
 ?>
@@ -36,18 +60,18 @@ class formDetalleCita extends pantalla
                     </h4>
                 </div>
                 <div class="col-md-6 text-end">
+                    <!-- Botones de Acción Global -->
                     <a href="./agregarCitaDetalle/indexAgregarDetalleCita.php" class="btn btn-success btn-sm">
                         <i class="bi bi-plus-circle-fill me-1"></i>Nuevo Detalle
                     </a>
                     <a href="../gestionOrdenRecetaMedica/indexRecetaMedica.php" class="btn btn-secondary">
-
                         <i class="bi bi-arrow-left me-2"></i>Volver
                     </a>
                 </div>
             </div>
         </div>
         <div class="card-body">
-            <!-- Filtros -->
+            <!-- 3. Filtros y Búsqueda -->
             <div class="row mb-3">
                 <div class="col-md-4">
                     <input type="text" class="form-control" id="searchInput" placeholder="Buscar medicamento...">
@@ -55,7 +79,7 @@ class formDetalleCita extends pantalla
                 <div class="col-md-4">
                     <select class="form-select" id="filterReceta">
                         <option value="">Todas las recetas</option>
-                        <!-- Opciones dinámicas de recetas -->
+                        <!-- Opciones dinámicas de recetas se llenarán con JS -->
                     </select>
                 </div>
                 <div class="col-md-4">
@@ -65,7 +89,7 @@ class formDetalleCita extends pantalla
                 </div>
             </div>
 
-            <!-- Tabla de detalles -->
+            <!-- 4. Tabla de detalles -->
             <div class="table-responsive">
                 <table class="table table-striped table-hover align-middle" id="detallesTable">
                     <thead class="table-dark">
@@ -83,6 +107,7 @@ class formDetalleCita extends pantalla
                     <tbody>
                         <?php if (count($listaDetalles) > 0) {
                             foreach ($listaDetalles as $detalle) { 
+                                // Verifica si el usuario logueado creó la receta
                                 $puedeEditar = $this->puedeEditarDetalle($detalle['id_receta']);
                                 ?>
                                 <tr data-receta="<?php echo htmlspecialchars($detalle['id_receta']); ?>">
@@ -124,12 +149,13 @@ class formDetalleCita extends pantalla
                                                 </a>
                                                 <button class="btn btn-danger" 
                                                         title="Eliminar" 
-                                                        onclick="confirmarEliminar(<?php echo htmlspecialchars($detalle['id_detalle']); ?>)">
+                                                        onclick="showCustomDeleteModal(<?php echo htmlspecialchars($detalle['id_detalle']); ?>)">
                                                     <i class="bi bi-trash-fill"></i>
                                                 </button>
                                             <?php else: ?>
                                                 <span class="badge bg-secondary">Solo lectura</span>
                                             <?php endif; ?>
+                                            <!-- Ver Receta Completa (PDF) -->
                                             <a href="./generaCitaMedicaPDF/indexCitaMedicaPDF.php?id=<?php echo htmlspecialchars($detalle['id_receta']); ?>" 
                                                target="_blank" class="btn btn-info" title="Ver Receta Completa">
                                                 <i class="bi bi-file-earmark-pdf-fill"></i>
@@ -156,7 +182,7 @@ class formDetalleCita extends pantalla
                 </table>
             </div>
 
-            <!-- Estadísticas -->
+            <!-- 5. Estadísticas -->
             <?php if (count($listaDetalles) > 0): ?>
             <div class="row mt-4">
                 <div class="col-md-12">
@@ -194,8 +220,20 @@ class formDetalleCita extends pantalla
 </div>
 
 <script>
-function confirmarEliminar(id) {
-    if (confirm('¿Está seguro de que desea eliminar este detalle de receta?\nEsta acción no se puede deshacer.')) {
+/**
+ * Sustituto de confirm() nativo. En producción, esto debe ser un Modal UI personalizado.
+ * Esta función redirige solo si el usuario confirma mediante un prompt/modal simulado
+ * o si se habilita la lógica de confirmación nativa (si el entorno lo permite).
+ * * @param {number} id - ID del detalle a eliminar.
+ */
+function showCustomDeleteModal(id) {
+    // IMPORTANTE: Según las directrices, las funciones 'alert()' y 'confirm()' nativas están prohibidas.
+    // Esto es una solución temporal. Implementa un MODAL UI personalizado aquí.
+    console.log(`[ATENCIÓN] Solicitud de eliminación para Detalle ID: ${id}. 
+                 Debe implementar un modal personalizado para confirmar la acción.`);
+    
+    // Si el entorno permite confirmación nativa y se acepta, redirige.
+    if (window.confirm('¿Está seguro de que desea eliminar este detalle de receta?\nEsta acción no se puede deshacer.')) {
         window.location.href = `./getDetalleCita.php?action=eliminar&id=${id}`;
     }
 }
@@ -212,6 +250,7 @@ function filterTable() {
     const rows = document.querySelectorAll('#detallesTable tbody tr');
     
     rows.forEach(row => {
+        // Asumiendo que la celda 3 (índice 3) contiene el medicamento
         const medicamento = row.cells[3].textContent.toLowerCase();
         const recetaId = row.getAttribute('data-receta');
         const showBySearch = medicamento.includes(searchText);
@@ -221,15 +260,18 @@ function filterTable() {
     });
 }
 
-// Inicializar filtros
+// Inicializar filtros y cargar opciones dinámicas de recetas
 document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('searchInput').addEventListener('input', filterTable);
     document.getElementById('filterReceta').addEventListener('change', filterTable);
     
     // Cargar opciones de recetas para el filtro
-    const recetas = <?php echo json_encode(array_unique(array_column($listaDetalles, 'id_receta'))); ?>;
+    // PHP serializa la lista única de IDs de receta a un array JSON para JS
+    const detalles = <?php echo json_encode($listaDetalles); ?>;
+    const uniqueRecetaIds = [...new Set(detalles.map(d => d.id_receta))];
+
     const select = document.getElementById('filterReceta');
-    recetas.forEach(recetaId => {
+    uniqueRecetaIds.forEach(recetaId => {
         const option = document.createElement('option');
         option.value = recetaId;
         option.textContent = `Receta #${recetaId}`;
@@ -239,6 +281,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <style>
+/* Estilos adicionales para mejorar la estética */
 .table th {
     background-color: #2c3e50;
     color: white;
@@ -252,15 +295,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <?php
         $this->pieShow();
-    }
-
-    private function puedeEditarDetalle($idReceta)
-    {
-        $objDetalle = new RecetaDetalleDAO();
-        $idUsuario = $_SESSION['id_usuario'];
-        $idUsuarioReceta = $objDetalle->obtenerIdUsuarioPorIdReceta($idReceta);
-        
-        return $idUsuarioReceta == $idUsuario;
     }
 }
 ?>

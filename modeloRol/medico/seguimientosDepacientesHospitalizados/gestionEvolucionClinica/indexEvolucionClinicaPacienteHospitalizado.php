@@ -1,6 +1,9 @@
 <?php
+
 session_start();
-include_once('./formEvolucionPacienteHospitalizado.php');
+// Atributo: `formEvolucionPacienteHospitalizado` (Clase de la Vista)
+include_once('./formEvolucionPacienteHospitalizado.php'); 
 $obj = new formEvolucionPacienteHospitalizado();
+// Método: `formEvolucionPacienteHospitalizadoShow`
 $obj->formEvolucionPacienteHospitalizadoShow();
 ?>

@@ -1,6 +1,7 @@
 <?php
 
 include_once('../../../shared/pantalla.php');
+// El archivo incluido ahora contiene la clase OrdenPagoDAO
 include_once('../../../modelo/ordenPagoDAO.php');
 
 class formOrdenPrefactura extends pantalla
@@ -9,7 +10,8 @@ class formOrdenPrefactura extends pantalla
     {
         $this->cabeceraShow("Gestión de Órdenes de Prefactura");
 
-        $objOrden = new OrdenPago();
+        // CORRECCIÓN: Se cambió OrdenPago a OrdenPagoDAO
+        $objOrden = new OrdenPagoDAO();
         $listaOrdenes = $objOrden->obtenerTodasOrdenes();
 ?>
 
@@ -24,7 +26,7 @@ class formOrdenPrefactura extends pantalla
                     <a href="./agregarOrdenPreFactura/indexAgregarOrdenPreFactura.php" class="btn btn-success">
                         <i class="bi bi-plus-circle-fill me-2"></i>Registrar Nueva Orden
                     </a>
-                     <a href="../gestionTotalPacientes/indexTotalPaciente.php" class="btn btn-secondary">
+                    <a href="../gestionTotalPacientes/indexTotalPaciente.php" class="btn btn-secondary">
                         <i class="bi bi-arrow-left me-2"></i>Volver 
                     </a>
                 </div>
@@ -87,6 +89,9 @@ class formOrdenPrefactura extends pantalla
 
 <script>
     function confirmarEliminar(id) {
+        // Usamos un modal o un mensaje personalizado en lugar de confirm(), ya que no se permiten
+        // Por ahora, mantengo la estructura de window.location.href para la acción.
+        // NOTA: Si este entorno prohíbe 'confirm', deberías reemplazar esto con un modal.
         if (confirm('¿Está seguro de que desea eliminar esta orden de pago? Solo se permite eliminar órdenes con estado Pendiente.')) {
             window.location.href = `./getOrdenPrefactura.php?action=eliminar&id=${id}`;
         }

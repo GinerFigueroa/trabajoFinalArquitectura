@@ -1,15 +1,16 @@
 <?php
-// modelo/ordenPago.php (Archivo Unificado con Singleton DAO)
+// FILE: modelo/OrdenPagoDAO.php
+// Contiene todos los Data Access Objects (DAOs) necesarios para la gestión de Órdenes y entidades relacionadas.
 
-// Asumo que la clase Conexion (Singleton) está definida en este archivo o accesible vía include
-// Si tu archivo de conexión se llama diferente, ajusta el include.
+// ⚠️ IMPORTANTE: Asegúrate de que la ruta a 'conexion.php' sea correcta desde donde se use este archivo.
 include_once('conexion.php'); 
 
 // =================================================================
-// 1. CLASE PRINCIPAL: OrdenPago (DAO)
+// 1. CLASE PRINCIPAL: OrdenPagoDAO (Gestión de órdenes de pago)
+// Se renombró de 'OrdenPago' a 'OrdenPagoDAO' para claridad.
 // =================================================================
 
-class OrdenPago
+class OrdenPagoDAO
 {
     private $connection; // Almacenará el objeto mysqli
 
@@ -44,7 +45,6 @@ class OrdenPago
             }
         }
         
-        // NO se llama a cerrarConexion aquí; se espera hacerlo al final del script.
         return $ordenes;
     }
     
@@ -76,20 +76,21 @@ class OrdenPago
         $conn = $this->connection;
         $resultado = false;
         
+        // Uso de NULL para la base de datos si los IDs no están presentes
         $idCita = $idCita ?: NULL;
         $idInternado = $idInternado ?: NULL;
         
+        // Definición de tipos para bind_param (ajustada para manejar posibles NULLs o diferentes rutas de SQL)
         if ($idCita === NULL && $idInternado === NULL) {
-            // Caso donde solo se registra por concepto (sin cita/internado)
+            // Caso 1: Solo por concepto
             $sql = "INSERT INTO orden_pago (id_paciente, concepto, monto_estimado, estado) VALUES (?, ?, ?, 'Pendiente')";
             $stmt = $conn->prepare($sql);
-            // Asumiendo que mysqli es inteligente con el tipado, usamos los tipos correctos
             $stmt->bind_param("isd", $idPaciente, $concepto, $monto);
         } else {
-            // Caso donde se registra con cita y/o internado
+            // Caso 2: Con cita y/o internado
             $sql = "INSERT INTO orden_pago (id_paciente, id_cita, id_internado, concepto, monto_estimado, estado) VALUES (?, ?, ?, ?, ?, 'Pendiente')";
             $stmt = $conn->prepare($sql);
-            // Usamos 'iissd' asumiendo que el binding maneja los NULLs correctamente.
+            // 'iiisd' asumiendo que mysqli maneja los NULLs para los IDs (ii) correctamente
             $stmt->bind_param("iiisd", $idPaciente, $idCita, $idInternado, $concepto, $monto);
         }
 
@@ -106,6 +107,7 @@ class OrdenPago
         $conn = $this->connection;
         $resultado = false;
 
+        // Solo se permite editar si el estado es 'Pendiente'
         $sql = "UPDATE orden_pago SET concepto = ?, monto_estimado = ? WHERE id_orden = ? AND estado = 'Pendiente'";
         
         $stmt = $conn->prepare($sql);
@@ -124,6 +126,7 @@ class OrdenPago
         $conn = $this->connection;
         $resultado = false;
 
+        // Solo se permite eliminar si el estado es 'Pendiente'
         $sql = "DELETE FROM orden_pago WHERE id_orden = ? AND estado = 'Pendiente'";
         
         $stmt = $conn->prepare($sql);
@@ -139,10 +142,11 @@ class OrdenPago
 }
 
 // =================================================================
-// 2. CLASE PARA PACIENTE (DAO)
+// 2. CLASE PARA PACIENTE (PacienteDAO)
+// Se renombró de 'Paciente' a 'PacienteDAO'.
 // =================================================================
 
-class Paciente 
+class PacienteDAO 
 {
     private $connection;
     public function __construct()
@@ -154,7 +158,11 @@ class Paciente
     {
         $conn = $this->connection;
         
-        $sql = "SELECT p.id_paciente, u.nombre, u.apellido_paterno, u.apellido_materno, p.dni FROM pacientes p JOIN usuarios u ON p.id_usuario = u.id_usuario WHERE u.id_rol = ? ORDER BY u.apellido_paterno";
+        $sql = "SELECT p.id_paciente, u.nombre, u.apellido_paterno, u.apellido_materno, p.dni 
+                FROM pacientes p 
+                JOIN usuarios u ON p.id_usuario = u.id_usuario 
+                WHERE u.id_rol = ? 
+                ORDER BY u.apellido_paterno";
         
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("i", $idRol);
@@ -174,10 +182,11 @@ class Paciente
 }
 
 // =================================================================
-// 3. CLASE PARA CONSULTAS DE CITAS (DAO Auxiliar)
+// 3. CLASE PARA CONSULTAS DE CITAS (CitasDAO)
+// Se renombró de 'EntidadCitas' a 'CitasDAO'.
 // =================================================================
 
-class EntidadCitas 
+class CitasDAO 
 {
     private $connection;
     public function __construct()
@@ -221,10 +230,12 @@ class EntidadCitas
 }
 
 // =================================================================
-// 4. CLASE PARA CONSULTAS DE INTERNADOS (DAO Auxiliar)
+// 4. CLASE PARA CONSULTAS DE INTERNADOS Y EXÁMENES (InternadosDAO)
+// Se renombró de 'EntidadInternados' a 'InternadosDAO'.
+// Esta clase también maneja la lógica de 'orden_examen'.
 // =================================================================
 
-class EntidadInternados
+class InternadosDAO
 {
     private $connection;
     public function __construct()
@@ -260,128 +271,128 @@ class EntidadInternados
     }
 
     /**
- * Registra una nueva orden de examen
- */
-public function registrarOrden($historiaClinicaId, $idUsuarioMedico, $fecha, $tipoExamen, $indicaciones, $estado = 'Pendiente', $resultados = null)
-{
-    // Primero obtener el id_medico a partir del id_usuario
-    $idMedico = $this->obtenerIdMedicoPorUsuario($idUsuarioMedico);
-    
-    if (!$idMedico) {
-        error_log("Error: No se pudo encontrar id_medico para id_usuario: " . $idUsuarioMedico);
-        return false;
+    * Registra una nueva orden de examen
+    */
+    public function registrarOrdenExamen($historiaClinicaId, $idUsuarioMedico, $fecha, $tipoExamen, $indicaciones, $estado = 'Pendiente', $resultados = null)
+    {
+        // Primero obtener el id_medico a partir del id_usuario
+        $idMedico = $this->obtenerIdMedicoPorUsuario($idUsuarioMedico);
+        
+        if (!$idMedico) {
+            error_log("Error: No se pudo encontrar id_medico para id_usuario: " . $idUsuarioMedico);
+            return false;
+        }
+
+        $sql = "INSERT INTO orden_examen 
+                (historia_clinica_id, id_medico, fecha, tipo_examen, indicaciones, estado, resultados) 
+                VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+        $stmt = $this->connection->prepare($sql);
+        
+        if (!$stmt) {
+            error_log("Error preparando consulta: " . $this->connection->error);
+            return false;
+        }
+
+        $stmt->bind_param("iisssss", 
+            $historiaClinicaId, 
+            $idMedico, // Usamos el id_medico correcto
+            $fecha, 
+            $tipoExamen, 
+            $indicaciones, 
+            $estado, 
+            $resultados
+        );
+        
+        $resultado = $stmt->execute();
+        
+        if (!$resultado) {
+            error_log("Error ejecutando consulta: " . $stmt->error);
+        }
+        
+        $stmt->close();
+        
+        return $resultado;
     }
 
-    $sql = "INSERT INTO orden_examen 
-            (historia_clinica_id, id_medico, fecha, tipo_examen, indicaciones, estado, resultados) 
-            VALUES (?, ?, ?, ?, ?, ?, ?)";
-
-    $stmt = $this->connection->prepare($sql);
-    
-    if (!$stmt) {
-        error_log("Error preparando consulta: " . $this->connection->error);
-        return false;
-    }
-
-    $stmt->bind_param("iisssss", 
-        $historiaClinicaId, 
-        $idMedico, // Usamos el id_medico correcto
-        $fecha, 
-        $tipoExamen, 
-        $indicaciones, 
-        $estado, 
-        $resultados
-    );
-    
-    $resultado = $stmt->execute();
-    
-    if (!$resultado) {
-        error_log("Error ejecutando consulta: " . $stmt->error);
-    }
-    
-    $stmt->close();
-    
-    return $resultado;
-}
-
-/**
- * Obtiene el id_medico a partir del id_usuario
- */
-public function obtenerIdMedicoPorUsuario($idUsuario)
-{
-    $sql = "SELECT m.id_medico 
-            FROM medicos m 
-            WHERE m.id_usuario = ?";
-    
-    $stmt = $this->connection->prepare($sql);
-    if (!$stmt) {
-        error_log("Error preparando consulta: " . $this->connection->error);
-        return null;
-    }
-    
-    $stmt->bind_param("i", $idUsuario);
-    
-    if (!$stmt->execute()) {
-        error_log("Error ejecutando consulta: " . $stmt->error);
+    /**
+    * Obtiene el id_medico a partir del id_usuario
+    */
+    public function obtenerIdMedicoPorUsuario($idUsuario)
+    {
+        $sql = "SELECT m.id_medico 
+                FROM medicos m 
+                WHERE m.id_usuario = ?";
+        
+        $stmt = $this->connection->prepare($sql);
+        if (!$stmt) {
+            error_log("Error preparando consulta: " . $this->connection->error);
+            return null;
+        }
+        
+        $stmt->bind_param("i", $idUsuario);
+        
+        if (!$stmt->execute()) {
+            error_log("Error ejecutando consulta: " . $stmt->error);
+            $stmt->close();
+            return null;
+        }
+        
+        $resultado = $stmt->get_result();
+        
+        if ($fila = $resultado->fetch_assoc()) {
+            $idMedico = $fila['id_medico'];
+            $stmt->close();
+            return $idMedico;
+        }
+        
         $stmt->close();
         return null;
     }
-    
-    $resultado = $stmt->get_result();
-    
-    if ($fila = $resultado->fetch_assoc()) {
-        $idMedico = $fila['id_medico'];
+
+    /**
+    * Verifica si un usuario es médico
+    */
+    public function esUsuarioMedico($idUsuario)
+    {
+        $sql = "SELECT COUNT(*) as count 
+                FROM usuarios u 
+                WHERE u.id_usuario = ? AND u.id_rol = 2 AND u.activo = 1";
+        
+        $stmt = $this->connection->prepare($sql);
+        $stmt->bind_param("i", $idUsuario);
+        $stmt->execute();
+        $resultado = $stmt->get_result();
+        $fila = $resultado->fetch_assoc();
         $stmt->close();
-        return $idMedico;
+        
+        return $fila['count'] > 0;
     }
-    
-    $stmt->close();
-    return null;
-}
 
-/**
- * Verifica si un usuario es médico
- */
-public function esUsuarioMedico($idUsuario)
-{
-    $sql = "SELECT COUNT(*) as count 
-            FROM usuarios u 
-            WHERE u.id_usuario = ? AND u.id_rol = 2 AND u.activo = 1";
-    
-    $stmt = $this->connection->prepare($sql);
-    $stmt->bind_param("i", $idUsuario);
-    $stmt->execute();
-    $resultado = $stmt->get_result();
-    $fila = $resultado->fetch_assoc();
-    $stmt->close();
-    
-    return $fila['count'] > 0;
-}
+    /**
+    * Obtiene información completa del médico por ID de usuario
+    */
+    public function obtenerMedicoPorIdUsuario($idUsuario)
+    {
+        $sql = "SELECT 
+                    m.id_medico,
+                    u.id_usuario,
+                    CONCAT(u.nombre, ' ', u.apellido_paterno, ' ', u.apellido_materno) AS nombre_completo,
+                    m.cedula_profesional,
+                    e.nombre as especialidad
+                FROM usuarios u
+                JOIN medicos m ON u.id_usuario = m.id_usuario
+                LEFT JOIN especialidades_medicas e ON m.id_especialidad = e.id_especialidad
+                WHERE u.id_usuario = ? AND u.id_rol = 2 AND u.activo = 1";
 
-/**
- * Obtiene información completa del médico por ID de usuario
- */
-public function obtenerMedicoPorIdUsuario($idUsuario)
-{
-    $sql = "SELECT 
-                m.id_medico,
-                u.id_usuario,
-                CONCAT(u.nombre, ' ', u.apellido_paterno, ' ', u.apellido_materno) AS nombre_completo,
-                m.cedula_profesional,
-                e.nombre as especialidad
-            FROM usuarios u
-            JOIN medicos m ON u.id_usuario = m.id_usuario
-            LEFT JOIN especialidades_medicas e ON m.id_especialidad = e.id_especialidad
-            WHERE u.id_usuario = ? AND u.id_rol = 2 AND u.activo = 1";
+        $stmt = $this->connection->prepare($sql);
+        $stmt->bind_param("i", $idUsuario);
+        $stmt->execute();
+        $resultado = $stmt->get_result();
+        $medico = $resultado->fetch_assoc();
+        $stmt->close();
 
-    $stmt = $this->connection->prepare($sql);
-    $stmt->bind_param("i", $idUsuario);
-    $stmt->execute();
-    $resultado = $stmt->get_result();
-    $medico = $resultado->fetch_assoc();
-    $stmt->close();
-
-    return $medico;
-}
+        return $medico;
+    }
 }
 ?>

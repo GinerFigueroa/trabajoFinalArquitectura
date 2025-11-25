@@ -1,7 +1,6 @@
 <?php
 // Archivo: modelo/PacienteTelegramDAO.php
 include_once('conexion.php'); 
-require_once __DIR__ . '/../modeloRol/administrador/gestionRecordatorioPaciente/configCron.php'; 
 
 class PacienteTelegramDAO 
 {
@@ -402,6 +401,64 @@ class PacienteTelegramDAO
             $this->connection->autocommit(true);
             if (isset($stmt)) $stmt->close();
         }
+    }
+    /**
+ * Verificar si un paciente existe en la base de datos
+ */
+public function pacienteExiste($idPaciente) 
+{
+    $sql = "SELECT COUNT(*) as total FROM pacientes WHERE id_paciente = ?";
+
+    $stmt = $this->connection->prepare($sql);
+    $stmt->bind_param("i", $idPaciente);
+    $stmt->execute();
+    $stmt->bind_result($count);
+    $stmt->fetch();
+    $stmt->close();
+    
+    return $count > 0;
+}
+  /**
+     * Obtener información básica del paciente
+     */
+    public function obtenerInfoPaciente($idPaciente) 
+    {
+        $sql = "SELECT 
+                    p.id_paciente, p.dni,
+                    CONCAT(u.nombre, ' ', u.apellido_paterno, ' ', u.apellido_materno) as nombre_completo,
+                    u.email, u.telefono
+                FROM pacientes p
+                JOIN usuarios u ON p.id_usuario = u.id_usuario
+                WHERE p.id_paciente = ?";
+
+        $stmt = $this->connection->prepare($sql);
+        $stmt->bind_param("i", $idPaciente);
+        $stmt->execute();
+        $resultado = $stmt->get_result();
+        $paciente = $resultado->fetch_assoc();
+        $stmt->close();
+        
+        return $paciente;
+    }
+
+    /**
+     * Verificar si el paciente está activo
+     */
+    public function pacienteActivo($idPaciente) 
+    {
+        $sql = "SELECT COUNT(*) as total 
+                FROM pacientes p
+                JOIN usuarios u ON p.id_usuario = u.id_usuario
+                WHERE p.id_paciente = ? AND u.activo = 1";
+
+        $stmt = $this->connection->prepare($sql);
+        $stmt->bind_param("i", $idPaciente);
+        $stmt->execute();
+        $stmt->bind_result($count);
+        $stmt->fetch();
+        $stmt->close();
+        
+        return $count > 0;
     }
 }
 ?>

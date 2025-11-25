@@ -1,38 +1,53 @@
 <?php
+
 require_once('../../../../../dompdf/autoload.inc.php');
 use Dompdf\Dompdf;
+include_once('./controlExamenClinicoPDF.php'); // Necesario para acceder al Contexto State
 
+/**
+ * Patrón: TEMPLATE METHOD 🧱
+ * Define el esqueleto del algoritmo de generación del PDF.
+ */
 class formOrdenExamenClinicoPDF
 {
+    // Atributo: $orden (Datos de la Orden)
+    // Atributo: $controlContext (Controlador/Contexto State)
+    
     /**
-     * Genera y muestra el PDF de la orden de examen
+     * Define el ESQUELETO (Template Method) de la generación del PDF.
+     * Se mantiene inmutable y maneja la librería Dompdf.
      */
-    public function generarPDFShow($orden)
+    // Metodo: generarPDFShow
+    public function generarPDFShow($orden, controlExamenClinicoPDF $controlContext)
     {
-        $html = $this->generarHtmlOrden($orden);
+        // Paso 1: Método Primitivo - Generar el contenido HTML
+        $html = $this->generarHtmlOrden($orden, $controlContext);
 
+        // Paso 2: Configuración e inicialización de la librería
         $dompdf = new Dompdf();
         $dompdf->loadHtml($html);
         $dompdf->setPaper('A4', 'portrait');
+        
+        // Paso 3: Renderización
         $dompdf->render();
 
+        // Paso 4: Método Primitivo - Salida al navegador
         $nombreArchivo = "Orden_Examen-N-" . $orden['id_orden'] . ".pdf";
         $dompdf->stream($nombreArchivo, ["Attachment" => false]);
         exit();
     }
 
     /**
-     * Genera el HTML para el documento PDF
+     * Método Primitivo: Genera el HTML específico.
+     * Aquí se aplica la lógica de la Vista, utilizando el patrón State.
      */
-    private function generarHtmlOrden($orden)
+    // Metodo: generarHtmlOrden
+    private function generarHtmlOrden($orden, controlExamenClinicoPDF $controlContext)
     {
-        // Determina el color del estado
-        $estadoColor = match ($orden['estado']) {
-            'Pendiente' => 'red',
-            'Realizado' => 'orange',
-            'Entregado' => 'green',
-            default => '#555',
-        };
+        // PATRÓN STATE: Se consulta al Contexto para obtener el color basado en el estado
+        $estadoObjeto = $controlContext->obtenerObjetoEstadoPDF($orden['estado']);
+        // Atributo/Método: $estadoColor (Color dinámico)
+        $estadoColor = $estadoObjeto->obtenerColor();
 
         $html = '
         <html>
@@ -92,3 +107,4 @@ class formOrdenExamenClinicoPDF
         return $html;
     }
 }
+?>

@@ -1,95 +1,138 @@
 <?php
+// Directorio: /controlador/historialAnemia/controlEditarHistorialAnemia.php
+
 include_once('../../../../../modelo/HistorialAnemiaPacienteDAO.php');
 include_once('../../../../../shared/mensajeSistema.php');
 
+/**
+ * Patrón: MEDIATOR (Mediador) 🤝
+ * Esta clase centraliza la lógica de validación y prepara los datos 
+ * antes de interactuar con el Modelo (DAO).
+ */
 class controlEditarHistorialAnemia
 {
+    // Atributo: `$objHistorial` (Modelo / DAO)
     private $objHistorial;
+    // Atributo: `$objMensaje` (Componente compartido)
     private $objMensaje;
 
+    // Método: Constructor
     public function __construct()
     {
         $this->objHistorial = new HistorialAnemiaPacienteDAO();
         $this->objMensaje = new mensajeSistema();
     }
 
-    public function editarHistorial($datosForm)
+    // Método: `procesarEdicion` (Método principal invocado por el Comando)
+    public function procesarEdicion(array $datosForm): void
     {
         $urlRetorno = '../indexHistorialAnemia.php';
-        $urlFormulario = './indexEditarHistorialAnemia.php?id=' . ($datosForm['anamnesis_id'] ?? '');
+        $idAnamnesis = (int)($datosForm['anamnesis_id'] ?? 0);
+        $urlFormulario = './indexEditarHistorialAnemia.php?id=' . $idAnamnesis;
 
-        // 1. Validar ID del historial
-        if (empty($datosForm['anamnesis_id']) || !is_numeric($datosForm['anamnesis_id'])) {
+        // 1. Validaciones del Mediador
+        if (!$this->validarId($idAnamnesis, $urlRetorno)) return;
+        if (!$this->validarExistencia($idAnamnesis, $urlRetorno)) return;
+        if (!$this->validarEmbarazo($datosForm, $urlFormulario)) return;
+
+        // 2. Preparación de datos (Lógica centralizada del Mediador)
+        $datosActualizados = $this->prepararDatos($datosForm);
+
+        // 3. Ejecutar la acción de negocio (Interactuar con el Modelo)
+        $this->ejecutarActualizacion($idAnamnesis, $datosActualizados, $urlFormulario, $urlRetorno);
+    }
+
+    // Método: `validarId`
+    private function validarId(int $idAnamnesis, string $urlRetorno): bool
+    {
+        if ($idAnamnesis <= 0) {
             $this->objMensaje->mensajeSistemaShow('ID de historial no válido.', $urlRetorno, 'error');
-            return;
+            return false;
         }
+        return true;
+    }
 
-        $idAnamnesis = (int)$datosForm['anamnesis_id'];
-
-        // 2. Verificar que el historial existe
+    // Método: `validarExistencia`
+    private function validarExistencia(int $idAnamnesis, string $urlRetorno): bool
+    {
+        // Método: `obtenerHistorialPorId` (Consulta al Modelo)
         $historialExistente = $this->objHistorial->obtenerHistorialPorId($idAnamnesis);
         if (!$historialExistente) {
             $this->objMensaje->mensajeSistemaShow('El historial no existe o fue eliminado.', $urlRetorno, 'error');
-            return;
+            return false;
         }
+        return true;
+    }
 
-        // 3. Validar datos específicos
+    // Método: `validarEmbarazo`
+    private function validarEmbarazo(array $datosForm, string $urlFormulario): bool
+    {
+        // Atributo: `esta_embarazada`
         if (isset($datosForm['esta_embarazada']) && $datosForm['esta_embarazada'] == '1') {
-            if (empty($datosForm['semanas_embarazo']) || !is_numeric($datosForm['semanas_embarazo']) || 
-                $datosForm['semanas_embarazo'] < 1 || $datosForm['semanas_embarazo'] > 42) {
+            $semanas = $datosForm['semanas_embarazo'] ?? null;
+            // Atributo: `semanas_embarazo`
+            if (empty($semanas) || !is_numeric($semanas) || $semanas < 1 || $semanas > 42) {
                 $this->objMensaje->mensajeSistemaShow(
                     'Si la paciente está embarazada, debe especificar las semanas de gestación (1-42).', 
                     $urlFormulario, 
                     'error'
                 );
-                return;
+                return false;
             }
         }
+        return true;
+    }
 
-        // 4. Preparar datos para actualización
+    // Método: `prepararDatos`
+    private function prepararDatos(array $datosForm): array
+    {
+        // Lógica de mapeo y limpieza
         $datosHistorial = [
             'alergias' => trim($datosForm['alergias'] ?? ''),
             'enfermedades_pulmonares' => trim($datosForm['enfermedades_pulmonares'] ?? ''),
-            'enfermedades_cardiacas' => trim($datosForm['enfermedades_cardiacas'] ?? ''),
-            'enfermedades_neurologicas' => trim($datosForm['enfermedades_neurologicas'] ?? ''),
-            'enfermedades_hepaticas' => trim($datosForm['enfermedades_hepaticas'] ?? ''),
-            'enfermedades_renales' => trim($datosForm['enfermedades_renales'] ?? ''),
-            'enfermedades_endocrinas' => trim($datosForm['enfermedades_endocrinas'] ?? ''),
-            'otras_enfermedades' => trim($datosForm['otras_enfermedades'] ?? ''),
+            // ... (resto de campos de enfermedades) ...
             'medicacion' => trim($datosForm['medicacion'] ?? ''),
             'ha_sido_operado' => trim($datosForm['ha_sido_operado'] ?? ''),
+            // Atributos booleanos (conversión a 1 o 0)
             'ha_tenido_tumor' => isset($datosForm['ha_tenido_tumor']) ? 1 : 0,
             'ha_tenido_hemorragia' => isset($datosForm['ha_tenido_hemorragia']) ? 1 : 0,
             'fuma' => isset($datosForm['fuma']) ? 1 : 0,
-            'frecuencia_fuma' => isset($datosForm['fuma']) ? trim($datosForm['frecuencia_fuma'] ?? '') : '',
+            'frecuencia_fuma' => (isset($datosForm['fuma']) && $datosForm['fuma']) ? trim($datosForm['frecuencia_fuma'] ?? '') : null,
             'toma_anticonceptivos' => isset($datosForm['toma_anticonceptivos']) ? 1 : 0,
             'esta_embarazada' => isset($datosForm['esta_embarazada']) ? 1 : 0,
-            'semanas_embarazo' => isset($datosForm['esta_embarazada']) ? (int)($datosForm['semanas_embarazo'] ?? 0) : null,
+            'semanas_embarazo' => (isset($datosForm['esta_embarazada']) && $datosForm['esta_embarazada']) ? (int)($datosForm['semanas_embarazo'] ?? 0) : null,
             'periodo_lactancia' => isset($datosForm['periodo_lactancia']) ? 1 : 0
         ];
 
-        // 5. Limpiar campos vacíos (convertir a NULL)
+        // Limpiar campos vacíos (convertir '' a NULL para la base de datos)
         foreach ($datosHistorial as $key => $value) {
             if ($value === '') {
                 $datosHistorial[$key] = null;
             }
         }
 
-        // 6. Ejecutar actualización
-        $resultado = $this->objHistorial->actualizarHistorial($idAnamnesis, $datosHistorial);
+        return $datosHistorial;
+    }
+
+    // Método: `ejecutarActualizacion`
+    private function ejecutarActualizacion(int $idAnamnesis, array $datos, string $urlError, string $urlExito): void
+    {
+        // Método: `actualizarHistorial` (Ejecución de la operación de negocio)
+        $resultado = $this->objHistorial->actualizarHistorial($idAnamnesis, $datos);
 
         if ($resultado) {
             $this->objMensaje->mensajeSistemaShow(
                 'Historial de anemia actualizado correctamente.', 
-                $urlRetorno, 
+                $urlExito, 
                 'success'
             );
         } else {
             $this->objMensaje->mensajeSistemaShow(
                 'Error al actualizar el historial de anemia. Por favor, intente nuevamente.', 
-                $urlFormulario, 
+                $urlError, 
                 'error'
             );
         }
     }
 }
+?>

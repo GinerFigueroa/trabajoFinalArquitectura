@@ -1,5 +1,5 @@
 <?php
-// C:\...\agregarTratamiento\formAgregarTratamiento.php
+
 include_once('../../../../shared/pantalla.php');
 include_once('../../../../modelo/TratamientoDAO.php'); 
 // Se asume que TratamientoDAO.php contiene o incluye EspecialidadDAO

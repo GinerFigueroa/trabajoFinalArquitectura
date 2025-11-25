@@ -1,23 +1,52 @@
 <?php
+// FILE: formEditarOdenPreFactura.php
 include_once('../../../../shared/pantalla.php');
 include_once('../../../../modelo/OrdenPagoDAO.php');
 
+/**
+ * PATRÓN: STATE (Contexto de Visualización)
+ * Gestiona si la orden es editable basándose en su estado.
+ */
+class OrdenEditState {
+    // MÉTODO (Lógica de Mapeo de Estado)
+    public function esEditable(string $estado): bool {
+        // ATRIBUTO implícito: Solo 'Pendiente' permite la edición.
+        return $estado === 'Pendiente';
+    }
+}
+
+/**
+ * PATRÓN: TEMPLATE METHOD (Clase Concreta)
+ * Define el esqueleto del proceso de visualización del formulario.
+ */
 class formEditarOdenPreFactura extends pantalla
 {
+    // ATRIBUTOS
+    private $objOrdenDAO; // Modelo
+    private $stateChecker;
+
+    // MÉTODO (Constructor)
+    public function __construct() {
+        $this->objOrdenDAO = new OrdenPago();
+        $this->stateChecker = new OrdenEditState();
+    }
+    
+    // MÉTODO (El Template Method principal)
     public function formEditarOdenPreFacturaShow()
     {
+        // PASO 1 (Plantilla): Cabecera
         $this->cabeceraShow('Editar Orden de Prefactura');
 
         $idOrden = $_GET['id'] ?? null;
 
         if (!$idOrden) {
             echo '<div class="alert alert-danger" role="alert">ID de Orden de Pago no proporcionado.</div>';
+            // PASO FINAL (Plantilla): Pie
             $this->pieShow();
             return;
         }
 
-        $objOrden = new OrdenPago();
-        $orden = $objOrden->obtenerOrdenPorId($idOrden);
+        $orden = $this->objOrdenDAO->obtenerOrdenPorId($idOrden);
 
         if (!$orden) {
             echo '<div class="alert alert-danger" role="alert">Orden de Pago no encontrada.</div>';
@@ -25,7 +54,8 @@ class formEditarOdenPreFactura extends pantalla
             return;
         }
 
-        $esEditable = ($orden['estado'] == 'Pendiente');
+        // Uso del PATRÓN STATE para determinar la editabilidad
+        $esEditable = $this->stateChecker->esEditable($orden['estado']);
 ?>
 
 <div class="container mt-4">
@@ -42,28 +72,6 @@ class formEditarOdenPreFactura extends pantalla
             
             <form action="./getEditarOrdenPreFactura.php" method="POST">
                 <input type="hidden" name="idOrden" value="<?php echo htmlspecialchars($orden['id_orden']); ?>">
-
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="paciente" class="form-label">Paciente:</label>
-                        <input type="text" class="form-control" value="<?php echo htmlspecialchars($orden['nombre_paciente_completo'] . ' (DNI: ' . $orden['dni_paciente'] . ')'); ?>" disabled>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="estado" class="form-label">Estado Actual:</label>
-                        <input type="text" class="form-control" value="<?php echo htmlspecialchars($orden['estado']); ?>" disabled>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="idCita" class="form-label">ID Cita:</label>
-                        <input type="text" class="form-control" value="<?php echo htmlspecialchars($orden['id_cita'] ?? 'N/A'); ?>" disabled>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="idInternado" class="form-label">ID Internamiento:</label>
-                        <input type="text" class="form-control" value="<?php echo htmlspecialchars($orden['id_internado'] ?? 'N/A'); ?>" disabled>
-                    </div>
-                </div>
 
                 <div class="mb-3">
                     <label for="concepto" class="form-label">Concepto / Detalle (*):</label>
@@ -89,6 +97,7 @@ class formEditarOdenPreFactura extends pantalla
 </div>
 
 <?php
+        // PASO FINAL (Plantilla): Pie de página
         $this->pieShow();
     }
 }

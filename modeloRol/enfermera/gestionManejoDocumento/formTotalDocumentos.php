@@ -1,23 +1,8 @@
-
 <?php
-// Archivo: formTotalDocumentos.php
+// Directorio: /vista/gestionDocumentos/formTotalDocumentos.php
 include_once('../../../shared/pantalla.php');
 include_once('../../../modelo/DocumentoDAO.php'); 
 
-/**
- * Clase DocumentoIterator (PATRÓN: ITERATOR) 
- */
-class DocumentoIterator implements Iterator {
-    private $documentos;
-    private $position = 0;
-
-    public function __construct(array $documentos) { $this->documentos = $documentos; }
-    public function rewind(): void { $this->position = 0; }
-    public function current(): mixed { return $this->documentos[$this->position]; }
-    public function key(): mixed { return $this->position; }
-    public function next(): void { ++$this->position; }
-    public function valid(): bool { return isset($this->documentos[$this->position]); }
-}
 
 
 class formTotalDocumentos extends pantalla // PATRÓN: TEMPLATE METHOD
@@ -42,7 +27,7 @@ class formTotalDocumentos extends pantalla // PATRÓN: TEMPLATE METHOD
         $listaDocumentosArray = $objDAO->obtenerTodosDocumentos();
         
         // 2. PATRÓN ITERATOR: Encapsular el Array
-        $documentosIterator = new DocumentoIterator($listaDocumentosArray);
+        // -- ELIMINADO: Se usa el array directamente --
 ?>
 
 <div class="container mt-4">
@@ -74,9 +59,9 @@ class formTotalDocumentos extends pantalla // PATRÓN: TEMPLATE METHOD
                     </thead>
                     <tbody>
                         <?php 
-                        // 🚀 USANDO EL ITERATOR
-                        if ($documentosIterator->valid()) {
-                            foreach ($documentosIterator as $doc) { 
+                        // 🚀 USANDO EL ARRAY DIRECTAMENTE (Iterator Eliminado)
+                        if (!empty($listaDocumentosArray)) {
+                            foreach ($listaDocumentosArray as $doc) { 
                         ?>
                                 <tr>
                                     <td><?php echo htmlspecialchars($doc['id_documento']); ?></td>
@@ -86,13 +71,12 @@ class formTotalDocumentos extends pantalla // PATRÓN: TEMPLATE METHOD
                                         <?php echo htmlspecialchars($doc['tipo']); ?>
                                     </td>
                                     <td>
-                               <td>
- <a href="http://localhost/<?php echo htmlspecialchars($doc['ruta_archivo']); ?>" 
-       target="_blank" 
-       title="Ver Documento">
-        <?php echo htmlspecialchars($doc['nombre']); ?>
-    </a>
-</td>                            </td>
+                                        <a href="http://localhost/<?php echo htmlspecialchars($doc['ruta_archivo']); ?>" 
+                                            target="_blank" 
+                                            title="Ver Documento">
+                                            <?php echo htmlspecialchars($doc['nombre']); ?>
+                                        </a>
+                                    </td>
                                     <td><?php echo htmlspecialchars($doc['subido_en_formato']); ?></td>
                                     <td><?php echo htmlspecialchars(substr($doc['notas'] ?? '', 0, 50) . '...'); ?></td>
                                     <td>
@@ -104,8 +88,10 @@ class formTotalDocumentos extends pantalla // PATRÓN: TEMPLATE METHOD
                                         </button>
                                     </td>
                                 </tr>
-                        <?php }
-                        } else { ?>
+                        <?php 
+                            }
+                        } else { 
+                        ?>
                             <tr>
                                 <td colspan="7" class="text-center">No hay documentos subidos en el sistema.</td>
                             </tr>
@@ -120,7 +106,7 @@ class formTotalDocumentos extends pantalla // PATRÓN: TEMPLATE METHOD
 <script>
     function confirmarEliminar(id) {
         if (confirm('¿Está seguro de que desea eliminar este documento? Esto eliminará el registro y el archivo.')) {
-            // Se asume que getDocumentos.php es el dispatcher correcto
+            // Se asume que getDocumento.php es el dispatcher correcto
             window.location.href = `./getDocumento.php?action=eliminar&id=${id}`; 
         }
     }

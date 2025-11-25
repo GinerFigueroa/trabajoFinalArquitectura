@@ -1,25 +1,28 @@
 <?php
-// C:\xampp\htdocs\TRABAJOFINALARQUITECTURA\modeloRol\administrador\gestionExamenDeEntrada\getExamenEntrada.php
-session_start();
 
 include_once('../../../shared/mensajeSistema.php');
-include_once('./controlExmenEntrada.php');
+include_once('./controlExmenEntrada.php'); // Incluimos el Mediator
 
-$objControl = new controlExmenEntrada();
+$objControl = new controlExmenEntrada(); // El Mediator
 $objMensaje = new mensajeSistema();
+
 
 // Manejo de la acción de ELIMINAR
 if (isset($_GET['action']) && $_GET['action'] == 'eliminar' && isset($_GET['id'])) {
     $examenId = $_GET['id'];
     
-    if (!is_numeric($examenId)) {
-        $objMensaje->mensajeSistemaShow("ID de Examen Clínico no válido.", "./indexExamenEntrada.php", "error"); 
-    } else {
-        $objControl->eliminarExamen((int)$examenId);
-    }
+    // Recolección de datos
+    $data = [
+        'action' => 'eliminar',
+        'examenId' => $examenId,
+    ];
+    
+    // MEDIATOR: Invoca el método coordinador con la acción y los datos.
+    $objControl->ejecutarComando('eliminar', $data);
+
 } else {
-    // Si no hay acción válida, redirige al formulario principal
+    // Si no hay acción válida, redirige al listado
     header("Location: ./indexExamenEntrada.php");
     exit();
 }
-?> 
+?>

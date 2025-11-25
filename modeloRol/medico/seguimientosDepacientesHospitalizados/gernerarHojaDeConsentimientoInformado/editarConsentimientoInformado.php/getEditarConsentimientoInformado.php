@@ -1,23 +1,31 @@
 <?php
+// Directorio: /controlador/consentimiento/editarConsentimientoInformado/getEditarConsentimientoInformado.php
+
 session_start();
 include_once('../../../../shared/mensajeSistema.php');
 include_once('./controlEditarConsentimientoInformado.php');
 
 $objMensaje = new mensajeSistema();
+// Atributo: `$objControl` (El Mediator)
+$objControl = new controlEditarConsentimientoInformado();
 
 if (isset($_POST['btnEditar'])) {
-    $idConsentimiento = $_POST['idConsentimiento'] ?? null;
-    $diagnostico = $_POST['diagnostico'] ?? '';
-    $tratamiento = $_POST['tratamiento'] ?? '';
+    // Recoger datos
+    $data = [
+        // Atributo: `idConsentimiento`
+        'idConsentimiento' => $_POST['idConsentimiento'] ?? null,
+        // Atributo: `diagnostico`
+        'diagnostico' => $_POST['diagnostico'] ?? '',
+        // Atributo: `tratamiento`
+        'tratamiento' => $_POST['tratamiento'] ?? '',
+    ];
 
-    if (empty($idConsentimiento)) {
-        $objMensaje->mensajeSistemaShow('ID de consentimiento no válido.', '../indexConsentimientoInformado.php', 'systemOut', false);
-        return;
-    }
+    // MEDIATOR: Invoca el método coordinador con la acción y los datos.
+    // Método: `ejecutarComando`
+    $objControl->ejecutarComando('editar', $data);
 
-    $objControl = new controlEditarConsentimientoInformado();
-    $objControl->editarConsentimiento($idConsentimiento, $diagnostico, $tratamiento);
 } else {
+    // Si no es la acción esperada, redirigir
     $objMensaje->mensajeSistemaShow('Acceso denegado.', '../indexConsentimientoInformado.php', 'systemOut', false);
 }
 ?>

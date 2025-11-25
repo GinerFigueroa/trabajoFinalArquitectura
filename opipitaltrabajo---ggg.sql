@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 20-11-2025 a las 04:16:29
+-- Tiempo de generación: 23-11-2025 a las 07:12:08
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -79,11 +79,10 @@ CREATE TABLE `boletas` (
 --
 
 INSERT INTO `boletas` (`id_boleta`, `id_orden`, `numero_boleta`, `tipo`, `monto_total`, `metodo_pago`, `fecha_emision`) VALUES
-(2, 8, '7475', 'Boleta', 23.00, 'Efectivo', '2025-11-04 11:42:20'),
+(2, 8, '7477', 'Boleta', 23.00, 'Efectivo', '2025-11-04 11:42:20'),
 (3, 3, '4117', 'Boleta', 103.00, 'Tarjeta', '2025-11-04 11:42:59'),
 (13, 10, '12', 'Boleta', 34.00, 'Efectivo', '2025-11-05 15:03:58'),
-(14, 9, '123', 'Boleta', 34.00, 'Efectivo', '2025-11-05 15:04:35'),
-(16, 11, '414', 'Boleta', 45.00, 'Efectivo', '2025-11-20 02:54:04');
+(14, 9, '123', 'Boleta', 34.00, 'Efectivo', '2025-11-05 15:04:35');
 
 -- --------------------------------------------------------
 
@@ -122,7 +121,37 @@ INSERT INTO `citas` (`id_cita`, `id_paciente`, `id_tratamiento`, `id_medico`, `f
 (35, 6, 1, 9, '2025-11-10 09:28:00', 30, 'Confirmada', 'en ayunas', 0, '2025-11-10 13:28:05', 2),
 (36, 7, 1, 8, '2025-11-10 10:32:00', 30, 'Confirmada', 'hola', 0, '2025-11-10 13:30:33', 2),
 (37, 6, 1, 9, '2025-11-20 21:29:00', 30, 'Pendiente', 'bbbb', 0, '2025-11-20 02:29:45', 9),
-(38, 6, 4, 8, '2025-11-20 21:31:00', 15, 'Pendiente', 'nnnnnnnnnnnn', 0, '2025-11-20 02:31:25', 9);
+(38, 6, 4, 8, '2025-11-20 21:31:00', 15, 'Pendiente', 'nnnnnnnnnnnn', 0, '2025-11-20 02:31:25', 9),
+(39, 6, 1, 9, '2025-11-21 13:06:00', 30, 'Pendiente', 'hola', 0, '2025-11-21 17:06:26', 2),
+(40, 6, 1, 9, '2025-11-22 22:18:00', 30, 'Confirmada', '', 0, '2025-11-23 03:15:34', 2),
+(41, 6, 1, 8, '2025-11-22 22:20:00', 30, 'Confirmada', 'hola', 0, '2025-11-23 03:17:38', 2),
+(42, 6, 3, 8, '2025-11-22 22:59:00', 60, 'Confirmada', '', 0, '2025-11-23 03:56:48', 2),
+(43, 6, 2, 9, '2025-11-23 01:07:00', 20, 'Completada', '', 0, '2025-11-23 04:05:09', 2),
+(44, 6, 2, 9, '2025-11-23 03:03:00', 20, 'Pendiente', '', 1, '2025-11-23 05:00:59', 2),
+(45, 6, 2, 8, '2025-11-23 04:17:00', 20, 'Pendiente', '', 1, '2025-11-23 05:12:11', 2),
+(46, 6, 2, 9, '2025-11-23 06:26:00', 20, 'Pendiente', '', 1, '2025-11-23 05:20:59', 2);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `codigos_verificacion`
+--
+
+CREATE TABLE `codigos_verificacion` (
+  `id` int(11) NOT NULL,
+  `id_usuario` int(11) NOT NULL,
+  `codigo` varchar(10) NOT NULL,
+  `fecha_creacion` timestamp NOT NULL DEFAULT current_timestamp(),
+  `fecha_expiracion` datetime NOT NULL,
+  `utilizado` tinyint(1) DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
+
+--
+-- Volcado de datos para la tabla `codigos_verificacion`
+--
+
+INSERT INTO `codigos_verificacion` (`id`, `id_usuario`, `codigo`, `fecha_creacion`, `fecha_expiracion`, `utilizado`) VALUES
+(1, 20, '282116', '2025-11-21 21:43:42', '2025-11-21 22:58:42', 1);
 
 -- --------------------------------------------------------
 
@@ -186,7 +215,7 @@ INSERT INTO `documentos` (`id_documento`, `id_paciente`, `tipo`, `nombre`, `ruta
 (10, 5, 'Radiografía', 'Fresas de diamante', '../../../TRABAJOFINALARQUITECTURA/archivos_documentos/doc_68f6592cb7501_1760975148.pdf', 'dsfsdf', '2025-10-20 15:45:48', 1),
 (11, 2, 'Radiografía', 'Fresas de diamante', '/TRABAJOFINALARQUITECTURA/archivos_documentos/doc_68f65c3866f2c_1760975928.pdf', 'dasf', '2025-10-20 15:58:48', 1),
 (12, 5, 'Radiografía', 'Fresas de diamante', 'TRABAJOFINALARQUITECTURA/archivos_documentos/doc_68f6636288a53_1760977762.pdf', 'dasdas', '2025-10-20 16:29:22', 1),
-(13, 5, 'Radiografía', 'Fresas de diamantesdsda', 'TRABAJOFINALARQUITECTURA/archivos_documentos/doc_68f666f96191a_1760978681.pdf', 'sadf', '2025-10-20 16:44:41', 1);
+(13, 5, 'Radiografía', 'Fresas de diamantesdsda', 'TRABAJOFINALARQUITECTURA/archivos_documentos/doc_68f666f96191a_1760978681.pdf', 'sadfwe', '2025-10-20 16:44:41', 1);
 
 -- --------------------------------------------------------
 
@@ -265,8 +294,8 @@ CREATE TABLE `examen_clinico` (
 
 INSERT INTO `examen_clinico` (`examen_id`, `historia_clinica_id`, `peso`, `talla`, `pulso`, `id_enfermero`) VALUES
 (2, 4, 23.00, 1.50, '34', 21),
-(3, 20, 23.00, 1.03, '34', 21),
-(6, 17, 56.00, 1.25, '34', 21);
+(3, 20, 23.00, 1.07, '34', 21),
+(6, 17, 56.00, 1.25, '44', 21);
 
 -- --------------------------------------------------------
 
@@ -293,7 +322,7 @@ CREATE TABLE `facturacion_internado` (
 
 INSERT INTO `facturacion_internado` (`id_factura`, `id_internado`, `fecha_emision`, `dias_internado`, `costo_habitacion`, `costo_tratamientos`, `costo_medicamentos`, `costo_otros`, `total`, `estado`) VALUES
 (1, 18, '2025-11-04', 6, 45.00, 114.00, 17.00, 0.00, 176.00, 'Pagado'),
-(2, 22, '2025-11-04', 6, 12.00, 45.00, 0.00, 0.00, 57.00, 'Pendiente'),
+(2, 22, '2025-11-04', 4, 12.00, 45.00, 0.00, 0.00, 57.00, 'Pendiente'),
 (3, 29, '2025-11-20', -1, 0.06, 0.07, 45.00, 41.00, 86.13, 'Pagado');
 
 -- --------------------------------------------------------
@@ -344,10 +373,11 @@ CREATE TABLE `historia_clinica` (
 --
 
 INSERT INTO `historia_clinica` (`historia_clinica_id`, `id_paciente`, `dr_tratante_id`, `fecha_creacion`) VALUES
-(3, 3, 2, '2025-10-28'),
-(4, 5, 2, '2025-11-05'),
+(3, 3, 21, '2025-10-28'),
+(4, 5, 21, '2025-11-06'),
 (17, 7, 21, '2025-11-06'),
-(20, 6, 21, '2025-11-10');
+(20, 6, 21, '2025-11-10'),
+(21, 8, 2, '2025-11-22');
 
 -- --------------------------------------------------------
 
@@ -490,7 +520,10 @@ INSERT INTO `orden_pago` (`id_orden`, `id_paciente`, `id_cita`, `id_internado`, 
 (8, 2, 26, 3, 'hola', 23.00, 'Facturada', '2025-09-28 05:49:34'),
 (9, 2, NULL, 3, 'holasd', 34.00, 'Facturada', '2025-09-28 05:50:10'),
 (10, 2, 26, 3, 'sdffdfsdf', 34.00, 'Facturada', '2025-10-20 20:51:45'),
-(11, 6, 29, 18, 'bbbbbbbb', 45.00, 'Facturada', '2025-11-20 02:32:25');
+(11, 6, 29, 18, 'bbbbbbbb', 45.00, 'Pendiente', '2025-11-20 02:32:25'),
+(12, 6, 29, NULL, 'gggk', 45.00, 'Pendiente', '2025-11-20 07:28:23'),
+(13, 6, 29, NULL, 'rrrr', 455.00, 'Pendiente', '2025-11-20 07:28:45'),
+(14, 6, 28, NULL, 'hola', 34.00, 'Pendiente', '2025-11-21 17:07:13');
 
 -- --------------------------------------------------------
 
@@ -525,8 +558,9 @@ INSERT INTO `pacientes` (`id_paciente`, `id_usuario`, `fecha_nacimiento`, `lugar
 (2, 4, '2001-07-24', 'jirron san luissfdfEQWE', 'data center', '47160428', 'leonso pradoeeHF', 'san martin sdd', 37, 'Masculino', 'solteroCVX', 'carlos', 'sifuenter', 'lozano', 'familiar', '2025-09-24 19:02:30'),
 (3, 11, '2025-10-02', 'jirron san luis', 'data centerr', '47160420', 'leonso pradoeer', 'san martin ', 34, 'Masculino', 'solteroCVX', 'Giner', 'sifuente', 'Gonzalez', 'werf', '2025-10-05 06:50:30'),
 (5, 18, '2025-10-18', 'san luiesew', 'ingerrwe', '4716027', 'masnsan nasaswe', 'weee', 34, 'M', 'Soltero', 'Giner', 'qw', 'Gonzalez', 'qw', '2025-10-19 22:30:32'),
-(6, 20, '2025-10-09', 'san luies', 'ingerr', '47160421', 'masnsan nasares', 'acochasca', 120, '', 'Soltero', 'Giner', 'ewrewr', 'Gonzalez', 'dsfsadfhfg', '2025-10-19 22:39:59'),
-(7, 17, '2025-11-07', 'san luiesewsdf', 'ingerrwe', '47160422', 'sdfdsff', 'sdfsadf', 47, 'M', 'Soltero', '', '', '', '', '2025-11-06 21:16:24');
+(6, 20, '2025-10-09', 'san luies', 'ingerr', '47160424', 'masnsan nasares', 'acochascaqw', 120, '', 'Soltero', 'Giner', 'ewrewr', 'Gonzalez', 'dsfsadfhfg', '2025-10-19 22:39:59'),
+(7, 17, '2025-11-07', 'san luiesewsdf', 'ingerrwe', '47160422', 'sdfdsff', 'sdfsadf', 47, 'M', 'Soltero', '', '', '', '', '2025-11-06 21:16:24'),
+(8, 27, '2025-11-14', 'san luiesesds', 'ingerr', '47160454', 'masnsan nasasdd', 'acochascasd', 32, 'M', 'Soltero', 'Giner', 'ewrewr', 'Gonzalez', 'dsfsadf', '2025-11-21 19:53:44');
 
 -- --------------------------------------------------------
 
@@ -545,6 +579,20 @@ CREATE TABLE `paciente_telegram` (
   `fecha_registro` datetime DEFAULT current_timestamp(),
   `fecha_actualizacion` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
+
+--
+-- Volcado de datos para la tabla `paciente_telegram`
+--
+
+INSERT INTO `paciente_telegram` (`id`, `id_paciente`, `chat_id`, `username_telegram`, `first_name`, `last_name`, `activo`, `fecha_registro`, `fecha_actualizacion`) VALUES
+(1, 6, 8492891837, 'ginerBush', 'Giner', 'Figueroa', 1, '2025-11-20 13:42:23', '2025-11-21 01:57:22'),
+(2, 2, 32342444, '@admin', 'Ginere', 'Figueroae', 0, '2025-11-20 14:33:49', '2025-11-21 00:56:22'),
+(3, 3, 3443531, 'drCarolay', 'rrrrr', 're', 1, '2025-11-20 15:33:32', '2025-11-21 13:19:00'),
+(4, 7, 4343453, 'adminbld', 'Ginerefd', 'ertrefedd', 1, '2025-11-20 18:48:35', '2025-11-20 19:55:04'),
+(5, 5, 111112, 'jmartinezE', 'Gineref', 'ertrefed', 0, '2025-11-20 19:59:54', '2025-11-21 14:10:00'),
+(6, 2, 345345, 'adminre', 'Ginerefe', 'ertreerr', 0, '2025-11-20 23:00:54', '2025-11-21 02:40:01'),
+(7, 5, 455555, 'recepci4on01', 'Ginereu0', 'Figueroap', 0, '2025-11-23 00:55:31', '2025-11-23 01:03:38'),
+(8, 5, 45645, 'admin6', 'Ginerefdgh', 'ertreetrt', 1, '2025-11-23 01:04:11', '2025-11-23 01:04:11');
 
 -- --------------------------------------------------------
 
@@ -715,21 +763,23 @@ CREATE TABLE `usuarios` (
 --
 
 INSERT INTO `usuarios` (`id_usuario`, `id_rol`, `email`, `usuario_clave`, `usuario_usuario`, `nombre`, `apellido_paterno`, `apellido_materno`, `telefono`, `activo`, `ultimo_login`, `estatus`, `creado_en`, `actualizado_en`) VALUES
-(2, 5, '12333@hotmail.com', '$2y$10$ZIatSDpOogs9aBI/hkWBA.lvOjcxlPVfsDWUvwIyofzTeHfYWwu1G', 'mariaMedico', 'maria', 'Velarde', 'Zhan', '124321', 1, '2025-10-17 14:44:50', 0, '2025-09-18 18:21:36', '2025-11-20 02:52:47'),
+(2, 3, '12333@hotmail.com', '$2y$10$ZIatSDpOogs9aBI/hkWBA.lvOjcxlPVfsDWUvwIyofzTeHfYWwu1G', 'mariaMedico', 'maria', 'Velarde', 'Zhan', '124321', 1, '2025-10-17 14:44:50', 0, '2025-09-18 18:21:36', '2025-11-23 02:35:48'),
 (3, 3, 'guuunene@hotmail.com', '$2y$10$JvvR3ESEPOpTh5sz2vsXTOcwW27NHSBdtiCja5.0JXcD5BiWJ6ape', 'rececepcionAr', 'recepcionPeres', 'gunnntienens', 'gunetes', '934735478', 1, NULL, 0, '2025-09-18 18:29:45', '2025-10-22 18:13:32'),
 (4, 4, 'jose@hotmail.com', '$2y$10$wYnKVeAL2UbdqrL9Y3IOWeGsLw4/LNGs6CMsI6.gOy.yO5OhAi.bu', 'josePaciente', 'jose', 'zhan', 'shacrell', '983848632', 1, NULL, 0, '2025-09-18 18:32:51', '2025-11-19 21:16:17'),
 (5, 1, 'patron@hotmail.com', '$2y$10$gnFXmUXJp2K9uzYxJOnkwOXL4EoLacc7PrwLDbhbWJHw2KMekK8zS', 'patronAdministrador', 'patron', 'franBusman', 'florezqw', '314872346', 1, NULL, 0, '2025-09-18 18:34:49', '2025-09-21 18:43:23'),
 (9, 3, 'arlen@hotmail.com', '$2y$10$XBKpMLX2Kx3YD.gSNYlwjegmf/.SMIz5Yh9MsYtioH.6jwh3OKOiy', 'ionistaArleniDDDF', 'arleni', 'flores', 'Melgarejo', '27983489', 1, '2025-10-17 14:48:36', 0, '2025-09-22 03:07:16', '2025-10-17 21:42:05'),
 (11, 4, 'mariapac@untels.edu.pe', '$2y$10$V.kx7l8KpvzI.A/0L9wvI.l1kKhrPgkRIgDxDo1OCJkQUPhQJ8kuK', 'mariaPacienteewedee', 'maria', 'filoessn', 'hdkajhd', '29834723', 1, NULL, 0, '2025-10-05 05:25:10', '2025-10-18 04:18:08'),
-(16, 1, '2113110108@duntels.edu.pe', '$2y$10$9fb0U2H4DuvAiMm40NU0vefWSUz7NMePg6w6SqoC7Bzic3r1MygR.', 'ginerasdQWDASDFDSF', 'GinersdfSDFS', 'asdaSD', 'Gonzalezfds', '925667407', 1, NULL, 0, '2025-10-18 08:30:08', '2025-10-18 08:30:43'),
+(16, 4, '2113110108@duntels.edu.pe', '$2y$10$9fb0U2H4DuvAiMm40NU0vefWSUz7NMePg6w6SqoC7Bzic3r1MygR.', 'ginerasdQWDASDFDSF', 'GinersdfSDFS', 'asdaSD', 'Gonzalezfds', '925667407', 1, NULL, 0, '2025-10-18 08:30:08', '2025-11-21 21:40:17'),
 (17, 4, '2113110108@unt4els.edu.pe', '$2y$10$CxAyipC/QhejOjCFZYJtyuNqPHNZwFxlqc2kEN0RnfyHIjaSq0vPi', 'ginerewqe', 'Ginewer', 'Figoueroa', 'Gonzalewez', '925667404', 1, NULL, 0, '2025-10-19 22:02:17', '2025-10-19 22:02:17'),
 (18, 4, '2113dsa110108@untels.edu.pe', '$2y$10$xayr38DcHjB1/I.R6gRche2NBpRSz.Ue7PfCSlRcVNag6w6oPiC56', 'gineradsde', 'Ginasder', 'Figruerewoa e', 'Gonzalasdez', '925767408', 1, NULL, 0, '2025-10-19 22:29:36', '2025-10-19 22:29:36'),
 (19, 4, '2113110148@untels.edu.pe', '$2y$10$bav06GUF6B5fT1cwKj4rHOeX5ZoTfLCAcSluvsxERxAFCxDqnPHCu', 'gineresdfsdsfsdgffsdg', 'sosowqssdf', 'Velardedfds', 'Gonzalezdsf', '925667608', 1, NULL, 0, '2025-10-19 22:32:05', '2025-10-19 23:42:06'),
-(20, 4, '2113110sd108@untels.edu.pe', '$2y$10$vQLGZeseXS9xSpbylu78hOyl5Zvke1ihqUDiYApejUfCelX8zxFlO', 'ginsderDD', 'Gisdner', 'dasdsd', 'Gonzalez', '925675408', 1, NULL, 0, '2025-10-19 22:39:10', '2025-10-19 23:42:23'),
+(20, 4, '2113110sd108@untels.edu.pe', '$2y$10$Qq250V6xKkweHsDz1pB9U.dypJsGLnUEjLOD77rqI5/uKio2.Uzt6', 'ginsderDD', 'Gisdner', 'dasdsd', 'Gonzalez', '925675408', 1, NULL, 0, '2025-10-19 22:39:10', '2025-11-21 21:45:02'),
 (21, 6, 'rocio@Untels.edu.pe', '$2y$10$9M5bKaIMdn2Uv3l.ZrL6TeeS4P6vVwVctlhwehQngKAUt4FkCbzQ6', 'EnfermeraRocio', 'RosiEnfermera', 'flores', 'margarita', '925667487', 1, NULL, 0, '2025-10-22 18:10:31', '2025-10-22 18:10:31'),
 (22, 5, 'juan@hotmail.com.edu.pe', '$2y$10$clTocCLVjWZIxFGWvKEAl.LV/78nDvnKgss3E5kbG8b44xkL1343O', 'cajeroJuan', 'juan', 'tafur', 'zerda', '925667456', 1, NULL, 0, '2025-11-04 09:14:40', '2025-11-04 09:14:40'),
 (23, 1, 'jose@hotmail.pe.com', '$2y$10$sIL2dQ5.UxcCNoTW0wS.NekuePC0zYrmJHgZpFvMak8VvKMLswHfC', 'JoseMedicos', 'Jose', 'Torres', 'ma', '925667441', 1, NULL, 0, '2025-11-10 12:22:30', '2025-11-18 18:58:33'),
-(24, 1, '2113110108@untels.edu.pe', '$2y$10$hPU5pGRt98mFIUa3NffDnO3kKh4d8YUvLF8cVB.k/z6gansOCyubu', 'ginereE', 'Giner', 'Figueroa', 'Gonzalez', '925667408', 1, NULL, 0, '2025-11-19 14:28:05', '2025-11-20 02:18:26');
+(25, 1, '211311sd0108@untels.edu.pe', '$2y$10$VqUj9jaH3/zaKOSKuI.jSeZ4caexSJQxkeV74qyK8tI/G70/Vl43y', 'ginderdd', 'Ginedr', 'eeeeeeeeee', 'Gonzadez', '925661408', 1, NULL, 0, '2025-11-20 05:08:40', '2025-11-20 05:09:04'),
+(26, 4, '21131re10108@untels.edu.pe', '$2y$10$oEhhTUlH8.8NswnYXfJF1elnE3WVFSfnULr7r6UrmtYc2MAaVT1nG', 'gineree', 'Giners', 'sifuentesd', 'Gonzaldez', '924567408', 1, NULL, 0, '2025-11-20 07:18:13', '2025-11-20 07:18:13'),
+(27, 4, 'whwh@paciente', '$2y$10$9QVVHA9oa7yU1QXOhwoteOsMSWMKwxl1clymstG1cfHHPzBoEiMWO', 'pacitente', 'Crlos', 'perssss', 'frores', '95566455', 1, NULL, 0, '2025-11-21 19:49:24', '2025-11-21 19:49:24');
 
 --
 -- Índices para tablas volcadas
@@ -760,6 +810,13 @@ ALTER TABLE `citas`
   ADD KEY `idx_citas_paciente` (`id_paciente`),
   ADD KEY `idx_citas_medico` (`id_medico`),
   ADD KEY `idx_citas_estado` (`estado`);
+
+--
+-- Indices de la tabla `codigos_verificacion`
+--
+ALTER TABLE `codigos_verificacion`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `id_usuario` (`id_usuario`);
 
 --
 -- Indices de la tabla `consentimiento_informado`
@@ -944,7 +1001,13 @@ ALTER TABLE `boletas`
 -- AUTO_INCREMENT de la tabla `citas`
 --
 ALTER TABLE `citas`
-  MODIFY `id_cita` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
+  MODIFY `id_cita` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=47;
+
+--
+-- AUTO_INCREMENT de la tabla `codigos_verificacion`
+--
+ALTER TABLE `codigos_verificacion`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `consentimiento_informado`
@@ -974,7 +1037,7 @@ ALTER TABLE `evolucion_medica_paciente`
 -- AUTO_INCREMENT de la tabla `examen_clinico`
 --
 ALTER TABLE `examen_clinico`
-  MODIFY `examen_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `examen_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT de la tabla `facturacion_internado`
@@ -992,7 +1055,7 @@ ALTER TABLE `habitaciones`
 -- AUTO_INCREMENT de la tabla `historia_clinica`
 --
 ALTER TABLE `historia_clinica`
-  MODIFY `historia_clinica_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `historia_clinica_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT de la tabla `internados`
@@ -1022,19 +1085,19 @@ ALTER TABLE `orden_examen`
 -- AUTO_INCREMENT de la tabla `orden_pago`
 --
 ALTER TABLE `orden_pago`
-  MODIFY `id_orden` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id_orden` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT de la tabla `pacientes`
 --
 ALTER TABLE `pacientes`
-  MODIFY `id_paciente` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id_paciente` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT de la tabla `paciente_telegram`
 --
 ALTER TABLE `paciente_telegram`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT de la tabla `receta_detalle`
@@ -1064,7 +1127,7 @@ ALTER TABLE `tratamientos`
 -- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id_usuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `id_usuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- Restricciones para tablas volcadas
@@ -1089,6 +1152,12 @@ ALTER TABLE `citas`
   ADD CONSTRAINT `citas_ibfk_1` FOREIGN KEY (`id_paciente`) REFERENCES `pacientes` (`id_paciente`),
   ADD CONSTRAINT `citas_ibfk_2` FOREIGN KEY (`id_medico`) REFERENCES `medicos` (`id_medico`),
   ADD CONSTRAINT `citas_ibfk_3` FOREIGN KEY (`id_tratamiento`) REFERENCES `tratamientos` (`id_tratamiento`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Filtros para la tabla `codigos_verificacion`
+--
+ALTER TABLE `codigos_verificacion`
+  ADD CONSTRAINT `codigos_verificacion_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id_usuario`);
 
 --
 -- Filtros para la tabla `consentimiento_informado`

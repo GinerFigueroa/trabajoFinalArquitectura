@@ -120,18 +120,7 @@ class screenBienvenida extends pantalla
                         </div>
                     </div>
                   </div>";
-                   echo "<div class='col'>
-                    <div class='card'>
-                        <div class='card-admin icon-container text-center'>
-                            <i class='bi bi-people-fill role-icon'></i>
-                        </div>
-                        <div class='card-body card-body-white text-center'>
-                            <h5 class='card-title'> Gestion bot telegran</h5>
-                            <p class='card-text'>Gestion Telegran, bot registra , editar</p>
-                            <a href='../modeloRol/administrador/gestionRecordatorioPaciente/indexRecordatorioPaciente.php' class='btn btn-primary'><i class='bi bi-arrow-right-circle'></i> Acceder</a>
-                        </div>
-                    </div>
-                  </div>";
+                  
                     
           
 
@@ -264,6 +253,18 @@ echo "<div class='col'>
                             <h5 class='card-title'>Gestión de Pacientes, gestion de citas, generar Pre Factura</h5>
                             <p class='card-text'>Registrar y actualizar datos</p>
                             <a href='../modeloRol/recepcion/gestionTotalPacientes/indexTotalPaciente.php' class='btn btn-primary'><i class='bi bi-arrow-right-circle'></i> Acceder</a>
+                        </div>
+                    </div>
+                  </div>";
+                   echo "<div class='col'>
+                    <div class='card'>
+                        <div class='card-admin icon-container text-center'>
+                            <i class='bi bi-people-fill role-icon'></i>
+                        </div>
+                        <div class='card-body card-body-white text-center'>
+                            <h5 class='card-title'> Gestion bot telegran</h5>
+                            <p class='card-text'>Gestion Telegran, bot registra , editar</p>
+                            <a href='../modeloRol/recepcion/gestionRecordatorioPaciente/indexRecordatorioPaciente.php' class='btn btn-primary'><i class='bi bi-arrow-right-circle'></i> Acceder</a>
                         </div>
                     </div>
                   </div>";

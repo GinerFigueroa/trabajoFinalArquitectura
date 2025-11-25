@@ -1,10 +1,12 @@
 <?php
+// FILE: getCitas.php
+
 session_start();
 include_once('../../../shared/mensajeSistema.php');
-include_once('./controlCitas.php');
+include_once('./controlCitas.php'); // Incluye el controlCitas actualizado
 
 $objMensaje = new mensajeSistema();
-$objControl = new controlCitas();
+$objControl = new controlCitas(); // Controlador/Invoker
 
 if (isset($_GET['action']) && isset($_GET['id'])) {
     $idCita = $_GET['id'];
@@ -18,7 +20,8 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
 
     switch ($action) {
         case 'cancelar':
-            $objControl->cancelarCita($idCita, $idUsuario);
+            // Llamada al Invoker, que internamente usa Command y Chain of Responsibility
+            $objControl->cancelarCita($idCita, $idUsuario); 
             break;
         default:
             $objMensaje->mensajeSistemaShow("Acción no válida.", "./indexCitas.php", "error");

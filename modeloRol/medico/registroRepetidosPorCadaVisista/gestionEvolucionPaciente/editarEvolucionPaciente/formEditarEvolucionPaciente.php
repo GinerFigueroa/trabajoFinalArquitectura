@@ -1,41 +1,51 @@
 <?php
-// formEditarEvolucionPaciente.php
 
 include_once("../../../../../shared/pantalla.php");
 include_once("../../../../../modelo/EvolucionPacienteDAO.php");
 include_once("../../../../../shared/mensajeSistema.php");
 
+/**
+ * Patrón: TEMPLATE METHOD 🧱
+ * Hereda de la clase 'pantalla' para definir el esqueleto de la vista.
+ */
 class formEditarEvolucionPaciente extends pantalla
 {
+    // Atributo: $objDAO (Receptor para la carga GET de datos)
     private $objDAO;
 
+    // Método: Constructor
     public function __construct() {
         $this->objDAO = new EvolucionPacienteDAO();
     }
 
+    // Método: formEditarEvolucionPacienteShow (Método del Template: Esqueleto de la página)
     public function formEditarEvolucionPacienteShow()
     {
+        // TEMPLATE METHOD: Paso 1 - Cabecera
         $this->cabeceraShow("Editar Evolución Médica");
 
         // Obtener ID de evolución desde GET
         $idEvolucion = isset($_GET['evo_id']) ? (int)$_GET['evo_id'] : null;
+        // Atributo: $objMensaje
+        $objMensaje = new mensajeSistema();
+        $rutaListado = "../indexEvolucionPaciente.php";
 
         if (!$idEvolucion) {
-            $objMensaje = new mensajeSistema();
-            $objMensaje->mensajeSistemaShow("ID de evolución no proporcionado.", "../indexEvolucionPaciente.php", "error");
+            $objMensaje->mensajeSistemaShow("ID de evolución no proporcionado.", $rutaListado, "error");
             return;
         }
 
         // Obtener datos de la evolución
+        // Método: obtenerEvolucionPorId
         $evolucion = $this->objDAO->obtenerEvolucionPorId($idEvolucion);
         
         if (!$evolucion) {
-            $objMensaje = new mensajeSistema();
-            $objMensaje->mensajeSistemaShow("Evolución médica no encontrada.", "../indexEvolucionPaciente.php", "error");
+            $objMensaje->mensajeSistemaShow("Evolución médica no encontrada.", $rutaListado, "error");
             return;
         }
 
         // Obtener información de la historia clínica para mostrar
+        // Método: obtenerHistoriaPorId
         $historiaClinica = $this->objDAO->obtenerHistoriaPorId($evolucion['historia_clinica_id']);
 ?>
 <div class="container mt-4">
@@ -65,48 +75,44 @@ class formEditarEvolucionPaciente extends pantalla
                     </div>
                 </div>
 
-                <!-- Nota Subjetiva (S) -->
                 <div class="mb-3">
                     <label for="nota_subjetiva" class="form-label">
-                        <strong>S - Nota Subjetiva</strong>
+                        <strong>S - Nota Subjetiva *</strong>
                         <small class="text-muted">(Síntomas o quejas referidas por el paciente)</small>
                     </label>
                     <textarea class="form-control" id="nota_subjetiva" name="nota_subjetiva" 
-                              rows="4" placeholder="Describa los síntomas que reporta el paciente..." required><?php echo htmlspecialchars($evolucion['nota_subjetiva']); ?></textarea>
+                                  rows="4" placeholder="Describa los síntomas que reporta el paciente..." required><?php echo htmlspecialchars($evolucion['nota_subjetiva']); ?></textarea>
                 </div>
 
-                <!-- Nota Objetiva (O) -->
                 <div class="mb-3">
                     <label for="nota_objetiva" class="form-label">
                         <strong>O - Nota Objetiva</strong>
                         <small class="text-muted">(Hallazgos del examen físico o resultados de pruebas)</small>
                     </label>
                     <textarea class="form-control" id="nota_objetiva" name="nota_objetiva" 
-                              rows="4" placeholder="Registre los hallazgos objetivos encontrados..."><?php echo htmlspecialchars($evolucion['nota_objetiva']); ?></textarea>
+                                  rows="4" placeholder="Registre los hallazgos objetivos encontrados..."><?php echo htmlspecialchars($evolucion['nota_objetiva']); ?></textarea>
                 </div>
 
-                <!-- Análisis (A) -->
                 <div class="mb-3">
                     <label for="analisis" class="form-label">
                         <strong>A - Análisis</strong>
                         <small class="text-muted">(Evaluación y diagnóstico del médico)</small>
                     </label>
                     <textarea class="form-control" id="analisis" name="analisis" 
-                              rows="4" placeholder="Realice el análisis y evaluación del caso..."><?php echo htmlspecialchars($evolucion['analisis']); ?></textarea>
+                                  rows="4" placeholder="Realice el análisis y evaluación del caso..."><?php echo htmlspecialchars($evolucion['analisis']); ?></textarea>
                 </div>
 
-                <!-- Plan de Acción (P) -->
                 <div class="mb-4">
                     <label for="plan_de_accion" class="form-label">
                         <strong>P - Plan de Acción</strong>
                         <small class="text-muted">(Tratamiento, medicamentos, interconsultas solicitadas)</small>
                     </label>
                     <textarea class="form-control" id="plan_de_accion" name="plan_de_accion" 
-                              rows="4" placeholder="Describa el plan de tratamiento y acciones a seguir..."><?php echo htmlspecialchars($evolucion['plan_de_accion']); ?></textarea>
+                                  rows="4" placeholder="Describa el plan de tratamiento y acciones a seguir..."><?php echo htmlspecialchars($evolucion['plan_de_accion']); ?></textarea>
                 </div>
 
                 <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                    <button type="submit" class="btn btn-warning text-white me-md-2">
+                    <button type="submit" name="btnActualizar" class="btn btn-warning text-white me-md-2">
                         <i class="bi bi-check-circle me-2"></i>Actualizar Evolución
                     </button>
                     <a href="../indexEvolucionPaciente.php" class="btn btn-secondary">
@@ -132,7 +138,8 @@ class formEditarEvolucionPaciente extends pantalla
 </script>
 
 <?php
+        // TEMPLATE METHOD: Paso 2 - Pie
         $this->pieShow();
     }
 }
-?>b
+?>

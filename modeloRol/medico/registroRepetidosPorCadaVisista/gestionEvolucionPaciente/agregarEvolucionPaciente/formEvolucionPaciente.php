@@ -1,25 +1,120 @@
+
+
 <?php
-// C:\...\agregarEvolucionPaciente\formEvolucionPaciente.php
+// Directorio: /vista/evolucion/agregarEvolucionPaciente/formEvolucionPaciente.php
 
 include_once("../../../../../shared/pantalla.php"); 
 include_once("../../../../../modelo/RegistroMedicoDAO.php"); 
 include_once("../../../../../shared/mensajeSistema.php");
 
+// ==========================================================
+// ESTRUCTURAS DE PATRONES: ITERATOR
+// ==========================================================
+
+// Atributo: Interfaz Iterador
+interface PacienteIterator {
+    // Método: `rewind`
+    public function rewind(): void;
+    // Método: `current`
+    public function current(): array;
+    // Método: `key`
+    public function key(): int;
+    // Método: `next`
+    public function next(): void;
+    // Método: `valid`
+    public function valid(): bool;
+}
+
+// Atributo: Iterador Concreto
+class IteradorPacientes implements PacienteIterator {
+    // Atributo: `$collection` (Referencia a la colección)
+    private $collection;
+    // Atributo: `$position` (Posición actual, estado interno)
+    private $position = 0;
+
+    // Método: Constructor
+    public function __construct(ColeccionPacientes $collection) {
+        $this->collection = $collection;
+    }
+
+    // Método: `rewind` (Reinicia la posición)
+    public function rewind(): void {
+        $this->position = 0;
+    }
+
+    // Método: `current` (Retorna el elemento actual)
+    public function current(): array {
+        return $this->collection->getPacientes()[$this->position];
+    }
+
+    // Método: `key` (Retorna la clave actual)
+    public function key(): int {
+        return $this->position;
+    }
+
+    // Método: `next` (Avanza al siguiente elemento)
+    public function next(): void {
+        $this->position++;
+    }
+
+    // Método: `valid` (Verifica si la posición es válida)
+    public function valid(): bool {
+        return isset($this->collection->getPacientes()[$this->position]);
+    }
+}
+
+// Atributo: Colección (Iterable)
+class ColeccionPacientes {
+    // Atributo: `$pacientes` (Array de datos)
+    private $pacientes = [];
+
+    // Método: Constructor
+    public function __construct(array $data) {
+        $this->pacientes = $data;
+    }
+
+    // Método: `getPacientes` (Getter de datos)
+    public function getPacientes(): array {
+        return $this->pacientes;
+    }
+
+    // Método: `getIterator` (Crea y retorna el Iterador concreto)
+    public function getIterator(): PacienteIterator {
+        return new IteradorPacientes($this);
+    }
+    
+    // Método: `isEmpty`
+    public function isEmpty(): bool {
+        return empty($this->pacientes);
+    }
+}
+
+// ==========================================================
+// VISTA (TEMPLATE METHOD)
+// ==========================================================
+
+/**
+ * Patrón: TEMPLATE METHOD 🧱
+ * Hereda de 'pantalla' para definir la estructura de la página.
+ */
 class formEvolucionPaciente extends pantalla
 {
+    // Método: `formEvolucionPacienteShow` (Método del Template)
     public function formEvolucionPacienteShow() 
     {
         $objMensaje = new mensajeSistema();
         
-        // Obtener ID del Médico de la Sesión
+        // Atributo: `$idMedico`
         $idMedico = $_SESSION['id_usuario'] ?? $_SESSION['user_id'] ?? 0; 
         
-        // ✅ Obtener pacientes CON historia clínica asignada
-        //obtenerHistoriasClinicas();
+        // 1. Obtención de datos y creación de la Colección
         $objHistoriaDAO = new RegistroMedicoDAO();
-        $pacientesConHistoria = $objHistoriaDAO->obtenerPacientesConHistoriaAsignada();
-
-        // Si no hay médico logueado, redirigir
+        // Atributo: `$dataPacientes` (Datos crudos)
+        $dataPacientes = $objHistoriaDAO->obtenerPacientesConHistoriaAsignada();
+        
+        // Atributo: `$coleccion` (La colección que será iterada)
+        $coleccion = new ColeccionPacientes($dataPacientes);
+        
         if ($idMedico == 0) {
             $objMensaje->mensajeSistemaShow(
                 "Debe iniciar sesión para registrar una evolución.", 
@@ -29,6 +124,7 @@ class formEvolucionPaciente extends pantalla
             exit();
         }
 
+        // TEMPLATE METHOD: Paso 1 - Cabecera
         $this->cabeceraShow("Registrar Nota de Evolución (SOAP)");
 ?>
 
@@ -48,26 +144,40 @@ class formEvolucionPaciente extends pantalla
             
             <form action="./getEvolucionPaciente.php" method="POST">
                 
-                <input type="hidden" name="id_medico" value="<?php echo htmlspecialchars($idMedico); ?>">
+                <input type="hidden" name="id_usuario_logueado" value="<?php echo htmlspecialchars($idMedico); ?>">
                 
                 <div class="mb-3">
                     <label for="id_paciente" class="form-label text-primary fw-bold">Paciente con Historia Clínica (*):</label>
                     <select class="form-select" id="id_paciente" name="historia_clinica_id" required 
-                        <?php echo empty($pacientesConHistoria) ? 'disabled' : ''; ?>>
+                        <?php echo $coleccion->isEmpty() ? 'disabled' : ''; ?>>
                         <option value="">-- Seleccione un Paciente --</option>
                         
-                        <?php if (empty($pacientesConHistoria)): ?>
+                        <?php 
+                        // Patrón: ITERATOR 🔁 (Uso formal del iterador)
+                        if (!$coleccion->isEmpty()):
+                            // Atributo: `$iterator`
+                            $iterator = $coleccion->getIterator();
+                            // Método: `rewind`
+                            $iterator->rewind(); 
+                            
+                            // Método: `valid` y `next`
+                            while ($iterator->valid()):
+                                // Atributo: `$paciente`
+                                $paciente = $iterator->current();
+                        ?>
+                            <option value="<?php echo htmlspecialchars($paciente['historia_clinica_id']); ?>">
+                                <?php echo htmlspecialchars($paciente['nombre_completo']); ?> 
+                                (HC ID: <?php echo htmlspecialchars($paciente['historia_clinica_id']); ?>)
+                            </option>
+                        <?php 
+                                $iterator->next(); // Método: `next`
+                            endwhile;
+                        else: 
+                        ?>
                             <option disabled>No hay pacientes con historia clínica registrada.</option>
-                        <?php else: ?>
-                            <?php foreach ($pacientesConHistoria as $paciente): ?>
-                                <option value="<?php echo htmlspecialchars($paciente['historia_clinica_id']); ?>">
-                                    <?php echo htmlspecialchars($paciente['nombre_completo']); ?> 
-                                    (HC ID: <?php echo htmlspecialchars($paciente['historia_clinica_id']); ?>)
-                                </option>
-                            <?php endforeach; ?>
                         <?php endif; ?>
                     </select>
-                    <?php if (empty($pacientesConHistoria)): ?>
+                    <?php if ($coleccion->isEmpty()): ?>
                         <small class="form-text text-muted">No se encontraron pacientes con historia clínica.</small>
                     <?php endif; ?>
                 </div>
@@ -96,7 +206,7 @@ class formEvolucionPaciente extends pantalla
                 
                 <div class="d-flex justify-content-between mt-4">
                     <button type="submit" name="action" value="registrar" class="btn btn-primary btn-lg"
-                        <?php echo empty($pacientesConHistoria) ? 'disabled' : ''; ?>>
+                        <?php echo $coleccion->isEmpty() ? 'disabled' : ''; ?>>
                         <i class="bi bi-save me-2"></i>Registrar Evolución
                     </button>
                     <a href="../indexEvolucionPaciente.php" class="btn btn-secondary btn-lg">
@@ -110,6 +220,7 @@ class formEvolucionPaciente extends pantalla
 </div>
 
 <?php
+        // TEMPLATE METHOD: Paso 2 - Pie
         $this->pieShow();
     }
 }

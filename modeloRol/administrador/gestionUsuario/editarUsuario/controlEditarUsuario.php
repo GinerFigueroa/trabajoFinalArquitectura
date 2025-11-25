@@ -1,11 +1,11 @@
 <?php
-// C:\xampp\htdocs\TRABAJOFINALARQUITECTURA\modeloRol\administrador\gestionUsuario\editarUsuario\controlEditarUsuario.php
+
 include_once('../../../../modelo/UsuarioDAO.php');
 include_once('../../../../shared/mensajeSistema.php');
 
-class controlEditarUsuario // MEDIATOR
+class controlEditarUsuario // MEDIATOR / COMMAND
 {
-    private $objUsuarioDAO;
+    private $objUsuarioDAO; // Receiver
     private $objMensaje;
     private $estadoEdicion = 'Pendiente'; // Emulación de STATE
 
@@ -15,51 +15,74 @@ class controlEditarUsuario // MEDIATOR
         $this->objMensaje = new mensajeSistema();
     }
 
-    // Emulación del patrón FACTORY METHOD
-    private function createHashedPassword($clave) {
+    /**
+     * Patrón: FACTORY METHOD 🏭
+     * Crea un hash seguro de la clave.
+     */
+    private function createHashedPassword(string $clave): string {
         return password_hash($clave, PASSWORD_DEFAULT);
     }
     
-    // Emulación del patrón STATE
-    private function setEstadoEdicion($estado) {
+    // Patrón: STATE (Método de control para seguimiento)
+    private function setEstadoEdicion(string $estado) {
         $this->estadoEdicion = $estado;
     }
 
-    // Emulación del patrón CHAIN OF RESPONSIBILITY
-    private function validarEdicionChain($idUsuario, $login, $email)
+    /**
+     * Patrón: CHAIN OF RESPONSIBILITY (Validaciones de unicidad) 🔗
+     * Valida que los campos únicos (login, email, teléfono) no pertenezcan a otro usuario.
+     * @return true|string Retorna TRUE si es válido, o un mensaje de error (string).
+     */
+    private function validarEdicionChain(int $idUsuario, string $login, string $email, string $telefono): true|string
     {
-        if (!is_numeric($idUsuario) || $idUsuario <= 0) {
-            return "ID de usuario no válido para edición. (CHAIN FAILED)";
-        }
+        $this->setEstadoEdicion('ValidandoUnicidad');
+        
+        // Validación 1: Unicidad de Login (exceptuando el ID actual)
         if ($this->objUsuarioDAO->validarCampoUnicoExcepto('usuario_usuario', $login, $idUsuario)) {
-            return "El nombre de usuario '{$login}' ya está en uso por otro usuario. (CHAIN: Usuario Único)";
+            return "El nombre de usuario '{$login}' ya está en uso por otro usuario.";
         }
+        
+        // Validación 2: Unicidad de Email (exceptuando el ID actual)
         if ($this->objUsuarioDAO->validarCampoUnicoExcepto('email', $email, $idUsuario)) {
-            return "El email '{$email}' ya está en uso por otro usuario. (CHAIN: Email Único)";
+            return "El email '{$email}' ya está en uso por otro usuario.";
         }
+        
+        // Validación 3: Unicidad de Teléfono (exceptuando el ID actual)
+        if ($this->objUsuarioDAO->validarCampoUnicoExcepto('telefono', $telefono, $idUsuario)) {
+            return "El teléfono '{$telefono}' ya está en uso por otro usuario.";
+        }
+        
         return true; 
     }
 
-    public function editarUsuario($idUsuario, $login, $nombre, $apellidoPaterno, $apellidoMaterno, $email, $telefono, $clave, $idRol, $activo) // COMMAND
+    /**
+     * Patrón: COMMAND (Método principal de edición) 🚀
+     * Coordina la validación, el hasheo de la clave y la persistencia de datos.
+     */
+    public function editarUsuario(int $idUsuario, string $login, string $nombre, string $apellidoPaterno, ?string $apellidoMaterno, string $email, string $telefono, string $clave, int $idRol, int $activo)
     {
-        $this->setEstadoEdicion('Validando');
-        
+        $this->setEstadoEdicion('IniciandoEdicion');
+        $urlRetornoFormulario = './indexEditarUsuario.php?id=' . $idUsuario;
+        $urlRetornoLista = '../indexGestionUsuario.php';
+
         // 1. Ejecución del CHAIN OF RESPONSIBILITY
-        $validacion = $this->validarEdicionChain($idUsuario, $login, $email);
+        $validacion = $this->validarEdicionChain($idUsuario, $login, $email, $telefono);
         
         if ($validacion !== true) {
-            $this->objMensaje->mensajeSistemaShow($validacion, './indexEditarUsuario.php?id=' . $idUsuario, 'systemOut', false);
+            // Error de validación: Volver al formulario
+            $this->objMensaje->mensajeSistemaShow($validacion, $urlRetornoFormulario, 'error');
             return;
         }
 
-        // 2. Ejecución de la Acción (COMMAND)
+        // 2. Preparación de la clave (solo si se proporciona una nueva)
         $this->setEstadoEdicion('PreparandoClave');
         $claveHasheada = null;
         if (!empty($clave)) {
-            // Uso del FACTORY METHOD si la clave se va a cambiar
-            $claveHasheada = $this->createHashedPassword($clave);
+            // Se recomienda añadir aquí la validación de complejidad de la clave si no se hizo en la vista/chain
+            $claveHasheada = $this->createHashedPassword($clave); // Uso del FACTORY METHOD
         }
         
+        // 3. Delegación al DAO (Receiver)
         $this->setEstadoEdicion('Guardando');
         $resultado = $this->objUsuarioDAO->editarUsuario(
             $idUsuario, 
@@ -69,18 +92,26 @@ class controlEditarUsuario // MEDIATOR
             $apellidoMaterno, 
             $email, 
             $telefono, 
-            $claveHasheada,
+            $claveHasheada, // null si no se cambia
             $idRol, 
             $activo
         );
 
-        // 3. Manejo de Respuesta
+        // 4. Manejo de Respuesta
         if ($resultado) {
             $this->setEstadoEdicion('Exito');
-            $this->objMensaje->mensajeSistemaShow('Usuario editado correctamente.', '../indexGestionUsuario.php', 'success');
+            $this->objMensaje->mensajeSistemaShow(
+                '✅ Usuario editado correctamente.', 
+                $urlRetornoLista, 
+                'success'
+            );
         } else {
             $this->setEstadoEdicion('Fallo');
-            $this->objMensaje->mensajeSistemaShow('Error al editar el usuario. (DAO FAIL)', './indexEditarUsuario.php?id=' . $idUsuario, 'error');
+            $this->objMensaje->mensajeSistemaShow(
+                '❌ Error al editar el usuario en la base de datos.', 
+                $urlRetornoLista, // En caso de error de BD, mejor volver a la lista principal
+                'error'
+            );
         }
     }
 }

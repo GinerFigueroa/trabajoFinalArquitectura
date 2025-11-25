@@ -1,10 +1,9 @@
 <?php
-// Archivo: getEmisionBoleta.php (Gateway para acciones de la lista principal)
 
 session_start();
 
 include_once('../../../shared/mensajeSistema.php');
-include_once('./controlEmisionBoleta.php'); // Usamos el control principal
+include_once('./controlEmisionBoleta.php'); // El Mediator
 
 $objControl = new controlEmisionBoleta();
 $objMensaje = new mensajeSistema();
@@ -15,14 +14,18 @@ $idBoleta = isset($_GET['id']) ? (int)$_GET['id'] : null;
 $urlRedireccion = "./indexEmisionBoletaFinal.php";
 
 if ($action == 'eliminar' && $idBoleta) {
-    if (!is_numeric($idBoleta)) {
-        $objMensaje->mensajeSistemaShow("ID de boleta no válido.", $urlRedireccion, "error");
-    } else {
-        $objControl->eliminarBoleta($idBoleta);
-    }
+    
+    $data = [
+        'action' => $action,
+        'idBoleta' => $idBoleta,
+    ];
+    
+    // MEDIATOR: Invoca el método coordinador con la acción y los datos.
+    // Reemplazamos la lógica directa por la llamada al nuevo método unificado
+    $objControl->ejecutarComando($action, $data);
+
 } else {
-    // Si no es una acción de eliminación, redirigir al listado
-    header("Location: {$urlRedireccion}");
-    exit();
+    // Si no es una acción válida o falta el ID, redirigir al listado
+    $objMensaje->mensajeSistemaShow("Acceso denegado o acción no válida.", $urlRedireccion, "systemOut", false);
 }
 ?>

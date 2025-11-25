@@ -1,30 +1,32 @@
 <?php
-session_start(); // ✅ AGREGAR ESTA LÍNEA
+
+session_start();
 include_once('../../../../../../shared/pantalla.php');
 include_once('../../../../../../modelo/RecetaMedicaDAO.php');
 
+/**
+ * Patrón: TEMPLATE METHOD 🧱
+ * Define la estructura de la página de registro.
+ */
 class formAgregarRecetaMedica extends pantalla
 {
+    // Método: `formAgregarRecetaMedicaShow` (Método del Template)
     public function formAgregarRecetaMedicaShow()
     {
         $this->cabeceraShow('Registrar Nueva Receta Médica');
 
         $objReceta = new RecetaMedicaDAO();
+        // Atributo: $historiasClinicas
         $historiasClinicas = $objReceta->obtenerHistoriasClinicas();
         
         // Obtener información del médico logueado
         $idUsuarioMedico = $_SESSION['id_usuario'] ?? null;
         $nombreMedico = $_SESSION['login'] ?? 'Usuario no identificado';
         
-        // Verificar que el usuario sea médico
+        // Lógica de Permisos (Parte del Template)
         if (!isset($_SESSION['rol_id']) || $_SESSION['rol_id'] != 2) {
-            include_once('../../../../shared/mensajeSistema.php');
-            $objMensaje = new mensajeSistema();
-            $objMensaje->mensajeSistemaShow(
-                '❌ Acceso denegado. Solo el personal médico puede registrar recetas.', 
-                '../../../../index.php', 
-                'error'
-            );
+            // ... (CÓDIGO DE ACCESO DENEGADO) ...
+            $this->mostrarMensaje('❌ Acceso denegado. Solo el personal médico puede registrar recetas.', '../../../../index.php', 'error');
             exit();
         }
 ?>
@@ -47,7 +49,9 @@ class formAgregarRecetaMedica extends pantalla
                         <label for="historiaClinicaId" class="form-label">Historia Clínica (*):</label>
                         <select class="form-select" id="historiaClinicaId" name="historiaClinicaId" required>
                             <option value="">Seleccione Historia Clínica</option>
-                            <?php foreach ($historiasClinicas as $hc) { ?>
+                            <?php 
+                            // ITERATOR (Implícito): Recorrido de Historias Clínicas
+                            foreach ($historiasClinicas as $hc) { ?>
                                 <option value="<?php echo htmlspecialchars($hc['historia_clinica_id']); ?>">
                                     <?php echo htmlspecialchars($hc['nombre_paciente'] . ' (HC: ' . $hc['historia_clinica_id'] . ')'); ?>
                                 </option>
@@ -63,14 +67,7 @@ class formAgregarRecetaMedica extends pantalla
                 <div class="mb-3">
                     <label for="indicacionesGenerales" class="form-label">Indicaciones Generales (*):</label>
                     <textarea class="form-control" id="indicacionesGenerales" name="indicacionesGenerales" rows="8" required placeholder="Ingrese las indicaciones médicas completas, incluyendo medicamentos, dosis, frecuencia, duración del tratamiento, precauciones, etc."></textarea>
-                    <div class="form-text">
-                        <strong>Ejemplo de formato:</strong><br>
-                        • Paracetamol 500mg - 1 tableta cada 8 horas por 5 días<br>
-                        • Ibuprofeno 400mg - 1 tableta cada 12 horas por 3 días<br>
-                        • Reposo relativo. Beber abundante líquido<br>
-                        • Control en 7 días
                     </div>
-                </div>
 
                 <div class="d-grid gap-2 mt-4">
                     <button type="submit" name="btnAgregar" class="btn btn-success btn-lg">

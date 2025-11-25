@@ -9,7 +9,7 @@ class formEditarHistorialPaciente extends pantalla
     {
         // Verificar sesión
         if (!isset($_SESSION['id_usuario'])) {
-            header("Location: ../../../../vista/login.php");
+            header("Location: ../../../../securityModule/indexLoginSegurity.php");
             exit();
         }
         

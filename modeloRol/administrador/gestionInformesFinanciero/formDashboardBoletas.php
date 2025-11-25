@@ -7,16 +7,18 @@ class formDashboardBoletas extends pantalla
 {
     public function formDashboardBoletasShow($datos)
     {
+        // Método: cabeceraShow (Heredado de pantalla - Parte del Template Method)
         $this->cabeceraShow("Dashboard de Boletas - Análisis Financiero");
         
-        $estadisticas = $datos['estadisticas'];
-        $ingresosMensuales = $datos['ingresos_mensuales'];
-        $distribucionTipo = $datos['distribucion_tipo'];
-        $distribucionMetodoPago = $datos['distribucion_metodo_pago'];
-        $boletasRecientes = $datos['boletas_recientes'];
-        $aniosDisponibles = $datos['anios_disponibles'];
-        $tendencia = $datos['tendencia'];
-        $filtros = $datos['filtros'];
+        // Extracción de datos (Prepara las variables locales para la renderización)
+        $estadisticas = $datos['estadisticas']; // Variable local
+        $ingresosMensuales = $datos['ingresos_mensuales']; // Variable local
+        $distribucionTipo = $datos['distribucion_tipo']; // Variable local
+        $distribucionMetodoPago = $datos['distribucion_metodo_pago']; // Variable local
+        $boletasRecientes = $datos['boletas_recientes']; // Variable local
+        $aniosDisponibles = $datos['anios_disponibles']; // Variable local
+        $tendencia = $datos['tendencia']; // Variable local
+        $filtros = $datos['filtros']; // Variable local
 ?>
 
 <div class="container-fluid mt-4">

@@ -1,5 +1,4 @@
 <?php
-// Archivo: formAgregarFacturaInternado.php
 
 include_once('../../../../shared/pantalla.php');
 include_once('../../../../modelo/FacturacionInternadoDAO.php'); 

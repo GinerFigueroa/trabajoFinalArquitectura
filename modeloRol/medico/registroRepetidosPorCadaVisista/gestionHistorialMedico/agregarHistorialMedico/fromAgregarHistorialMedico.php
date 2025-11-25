@@ -38,7 +38,6 @@ class formAgregarHistorialPaciente extends pantalla
             <?php endif; ?>
 
             <form action="./getAgregarHistorialMedico.php" method="POST">
-                <!-- Selección de Historia Clínica -->
                 <div class="mb-3">
                     <label for="historia_clinica_id" class="form-label">
                         <strong>Seleccionar Paciente (Historia Clínica) *</strong>
@@ -56,61 +55,54 @@ class formAgregarHistorialPaciente extends pantalla
 
                 <hr>
 
-                <!-- Motivo de Consulta -->
                 <div class="mb-3">
                     <label for="motivo_consulta" class="form-label">
                         <strong>Motivo de Consulta *</strong>
                     </label>
                     <textarea class="form-control" id="motivo_consulta" name="motivo_consulta" 
-                              rows="3" placeholder="Describa el motivo principal de la consulta..." required></textarea>
+                                 rows="3" placeholder="Describa el motivo principal de la consulta..." required></textarea>
                 </div>
 
-                <!-- Enfermedad Actual -->
                 <div class="mb-3">
                     <label for="enfermedad_actual" class="form-label">
                         <strong>Enfermedad Actual</strong>
                     </label>
                     <textarea class="form-control" id="enfermedad_actual" name="enfermedad_actual" 
-                              rows="3" placeholder="Describa la enfermedad actual del paciente..."></textarea>
+                                 rows="3" placeholder="Describa la enfermedad actual del paciente..."></textarea>
                 </div>
 
-                <!-- Tiempo de Enfermedad -->
                 <div class="mb-3">
                     <label for="tiempo_enfermedad" class="form-label">
                         <strong>Tiempo de Enfermedad</strong>
                     </label>
                     <input type="text" class="form-control" id="tiempo_enfermedad" name="tiempo_enfermedad" 
-                           placeholder="Ej: 3 días, 2 semanas, 1 mes...">
+                               placeholder="Ej: 3 días, 2 semanas, 1 mes...">
                 </div>
 
-                <!-- Signos y Síntomas -->
                 <div class="mb-3">
                     <label for="signos_sintomas" class="form-label">
                         <strong>Signos y Síntomas</strong>
                     </label>
                     <textarea class="form-control" id="signos_sintomas" name="signos_sintomas" 
-                              rows="3" placeholder="Describa los signos y síntomas presentes..."></textarea>
+                                 rows="3" placeholder="Describa los signos y síntomas presentes..."></textarea>
                 </div>
 
-                <!-- Riesgos -->
                 <div class="mb-3">
                     <label for="riesgos" class="form-label">
                         <strong>Factores de Riesgo</strong>
                     </label>
                     <textarea class="form-control" id="riesgos" name="riesgos" 
-                              rows="2" placeholder="Describa los factores de riesgo identificados..."></textarea>
+                                 rows="2" placeholder="Describa los factores de riesgo identificados..."></textarea>
                 </div>
 
-                <!-- Motivo Última Visita -->
                 <div class="mb-3">
                     <label for="motivo_ultima_visita" class="form-label">
                         <strong>Motivo de la Última Visita</strong>
                     </label>
                     <textarea class="form-control" id="motivo_ultima_visita" name="motivo_ultima_visita" 
-                              rows="2" placeholder="Describa el motivo de la última visita médica..."></textarea>
+                                 rows="2" placeholder="Describa el motivo de la última visita médica..."></textarea>
                 </div>
 
-                <!-- Última Visita Médica -->
                 <div class="mb-4">
                     <label for="ultima_visita_medica" class="form-label">
                         <strong>Fecha de Última Visita Médica</strong>
@@ -120,7 +112,7 @@ class formAgregarHistorialPaciente extends pantalla
                 </div>
 
                 <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                    <button type="submit" class="btn btn-success me-md-2">
+                    <button type="submit" name="btnGuardar" class="btn btn-success me-md-2">
                         <i class="bi bi-check-circle me-2"></i>Guardar Registro
                     </button>
                     <a href="../indexHistorialMedico.php" class="btn btn-secondary">
@@ -133,7 +125,7 @@ class formAgregarHistorialPaciente extends pantalla
 </div>
 
 <script>
-    // Validación básica del formulario
+    // Validación básica del formulario (Frontend)
     document.querySelector('form').addEventListener('submit', function(e) {
         const historiaClinica = document.getElementById('historia_clinica_id').value;
         const motivoConsulta = document.getElementById('motivo_consulta').value.trim();

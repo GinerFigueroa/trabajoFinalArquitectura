@@ -5,61 +5,37 @@ session_start();
 include_once('../../../../../shared/mensajeSistema.php');
 include_once('./controlEditarHistorialMedico.php');
 
-// Verificar que es una petición POST
-if ($_SERVER["REQUEST_METHOD"] != "POST") {
-    $objMensaje = new mensajeSistema();
-    $objMensaje->mensajeSistemaShow("Método no permitido.", "../indexHistorialMedico.php", "error");
-    exit();
-}
-
-// Validar que el ID del registro esté presente
-if (!isset($_POST['registro_medico_id']) || empty($_POST['registro_medico_id'])) {
-    $objMensaje = new mensajeSistema();
-    $objMensaje->mensajeSistemaShow("ID de registro no proporcionado.", "../indexHistorialMedico.php", "error");
-    exit();
-}
-
-// Validar campos requeridos
-if (!isset($_POST['motivo_consulta'])) {
-    $objMensaje = new mensajeSistema();
-    $objMensaje->mensajeSistemaShow("Faltan campos obligatorios.", "../indexHistorialMedico.php", "error");
-    exit();
-}
-
-// Recoger y limpiar datos
-$registro_medico_id = (int)$_POST['registro_medico_id'];
-$motivo_consulta = trim($_POST['motivo_consulta']);
-$enfermedad_actual = isset($_POST['enfermedad_actual']) ? trim($_POST['enfermedad_actual']) : '';
-$tiempo_enfermedad = isset($_POST['tiempo_enfermedad']) ? trim($_POST['tiempo_enfermedad']) : '';
-$signos_sintomas = isset($_POST['signos_sintomas']) ? trim($_POST['signos_sintomas']) : '';
-$riesgos = isset($_POST['riesgos']) ? trim($_POST['riesgos']) : '';
-$motivo_ultima_visita = isset($_POST['motivo_ultima_visita']) ? trim($_POST['motivo_ultima_visita']) : '';
-$ultima_visita_medica = isset($_POST['ultima_visita_medica']) && !empty($_POST['ultima_visita_medica']) ? $_POST['ultima_visita_medica'] : null;
-
-// Validar ID de registro
-if ($registro_medico_id <= 0) {
-    $objMensaje = new mensajeSistema();
-    $objMensaje->mensajeSistemaShow("ID de registro no válido.", "../indexHistorialMedico.php", "error");
-    exit();
-}
-
-// Validar motivo de consulta
-if (empty($motivo_consulta)) {
-    $objMensaje = new mensajeSistema();
-    $objMensaje->mensajeSistemaShow("El motivo de consulta es obligatorio.", "./indexEditarHistorialMedico.php?reg_id=" . $registro_medico_id, "error");
-    exit();
-}
-
-// Llamar al controlador
+$objMensaje = new mensajeSistema();
+// Atributo: $objControl (El Mediator)
 $objControl = new controlEditarHistorialPaciente();
-$objControl->editarRegistro(
-    $registro_medico_id,
-    $motivo_consulta,
-    $enfermedad_actual,
-    $tiempo_enfermedad,
-    $signos_sintomas,
-    $riesgos,
-    $motivo_ultima_visita,
-    $ultima_visita_medica
-);
+
+if (isset($_POST['btnActualizar'])) {
+    // Recoger datos
+    $data = [
+        // Atributo: registro_medico_id
+        'registro_medico_id' => $_POST['registro_medico_id'] ?? null,
+        // Atributo: motivo_consulta
+        'motivo_consulta' => $_POST['motivo_consulta'] ?? '',
+        // Atributo: enfermedad_actual
+        'enfermedad_actual' => $_POST['enfermedad_actual'] ?? '',
+        // Atributo: tiempo_enfermedad
+        'tiempo_enfermedad' => $_POST['tiempo_enfermedad'] ?? '',
+        // Atributo: signos_sintomas
+        'signos_sintomas' => $_POST['signos_sintomas'] ?? '',
+        // Atributo: riesgos
+        'riesgos' => $_POST['riesgos'] ?? '',
+        // Atributo: motivo_ultima_visita
+        'motivo_ultima_visita' => $_POST['motivo_ultima_visita'] ?? '',
+        // Atributo: ultima_visita_medica
+        'ultima_visita_medica' => $_POST['ultima_visita_medica'] ?? null,
+    ];
+
+    // MEDIATOR: Invoca el método coordinador con la acción y los datos.
+    // Método: ejecutarComando
+    $objControl->ejecutarComando('actualizar', $data);
+
+} else {
+    // Si no es la acción esperada, redirigir
+    $objMensaje->mensajeSistemaShow('Acceso denegado.', '../indexHistorialMedico.php', 'systemOut', false);
+}
 ?>

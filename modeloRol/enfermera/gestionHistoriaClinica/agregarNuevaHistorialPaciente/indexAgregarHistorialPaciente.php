@@ -1,5 +1,5 @@
 <?php
-// C:\...\agregarNuevaHistorialPaciente\indexAgregarHistorialPaciente.php
+
 session_start();
 
 include_once('./formAgregarHistorialPaciente.php');

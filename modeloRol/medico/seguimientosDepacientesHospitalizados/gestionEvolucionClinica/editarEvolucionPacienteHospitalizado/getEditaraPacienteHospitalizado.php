@@ -1,15 +1,14 @@
 <?php
-
 session_start();
-
 include_once('./controlEditarPacienteHospitalizado.php');
-$objControl = new controlEditarPacienteHospitalizado();
 include_once('../../../../../shared/mensajeSistema.php');
-$objMensaje = new mensajeSistema();
+
+$objControl = new controlEditarPacienteHospitalizado(); // Mediator
+$objMensaje = new mensajeSistema(); // Dependency (Mensajería)
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
-    // Validar ID de seguimiento
+    // Atributo: `$idSeguimiento` (PK)
     $idSeguimiento = isset($_POST['idSeguimiento']) ? (int)$_POST['idSeguimiento'] : null;
 
     if (empty($idSeguimiento)) {
@@ -18,14 +17,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     
     // Recoger y limpiar datos del formulario
-    $idInternado = isset($_POST['idInternado']) ? (int)$_POST['idInternado'] : null;
-    $idMedico = isset($_POST['idMedico']) ? (int)$_POST['idMedico'] : null;
-    $idEnfermera = isset($_POST['idEnfermera']) && !empty($_POST['idEnfermera']) ? (int)$_POST['idEnfermera'] : null;
-    $evolucion = isset($_POST['evolucion']) ? trim($_POST['evolucion']) : '';
-    $tratamiento = isset($_POST['tratamiento']) ? trim($_POST['tratamiento']) : '';
+    $data = [
+        'idSeguimiento' => $idSeguimiento,
+        // Atributo: `$idInternado`
+        'idInternado' => isset($_POST['idInternado']) ? (int)$_POST['idInternado'] : null,
+        // Atributo: `$idMedico` (ID de usuario)
+        'idMedico' => isset($_POST['idMedico']) ? (int)$_POST['idMedico'] : null,
+        // Atributo: `$idEnfermera` (ID de usuario, opcional)
+        'idEnfermera' => isset($_POST['idEnfermera']) && !empty($_POST['idEnfermera']) ? (int)$_POST['idEnfermera'] : null,
+        // Atributo: `$evolucion`
+        'evolucion' => isset($_POST['evolucion']) ? trim($_POST['evolucion']) : '',
+        // Atributo: `$tratamiento`
+        'tratamiento' => isset($_POST['tratamiento']) ? trim($_POST['tratamiento']) : '',
+    ];
 
-    // Llamar al controlador para editar
-    $objControl->editarEvolucion($idSeguimiento, $idInternado, $idMedico, $idEnfermera, $evolucion, $tratamiento);
+    // MEDIATOR: Invoca el método coordinador con la acción y los datos.
+    // Método: `ejecutarComando`
+    $objControl->ejecutarComando('editar', $data);
     
 } else {
     // Si no es POST, redirigir al formulario principal de gestión

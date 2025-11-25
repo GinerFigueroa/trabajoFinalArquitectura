@@ -1,15 +1,29 @@
 <?php
+
 include_once('../../../../shared/pantalla.php');
 include_once('../../../../modelo/HistorialAnemiaPacienteDAO.php');
 
+/**
+ * Patrón: TEMPLATE METHOD 🧱
+ * Hereda de la clase 'pantalla' para definir el esqueleto de la vista.
+ * Patrón: ITERATOR 🔄 (Implícito al iterar sobre `$listaHistoriales`)
+ */
 class formHistorialAnemia extends pantalla
 {
+    // Método: `formHistorialAnemiaShow` (Método del Template: Esqueleto de la página)
     public function formHistorialAnemiaShow()
     {
+        // TEMPLATE METHOD: Paso 1 - Cabecera
         $this->cabeceraShow("Gestión de Historial de Anemia y Antecedentes");
 
+        // Obtención de datos por la Vista (para listado inicial)
         $objHistorial = new HistorialAnemiaPacienteDAO();
-        $listaHistoriales = $objHistorial->obtenerTodosHistoriales();
+        // Método: `obtenerTodosHistoriales`
+        $listaHistoriales = $objHistorial->obtenerTodosHistoriales(); 
+        
+        // Obtener estadísticas (usando un método directo del DAO para la vista)
+        // Método: `obtenerEstadisticasFactoresRiesgo`
+        $estadisticas = $objHistorial->obtenerEstadisticasFactoresRiesgo();
 ?>
 
 <div class="container mt-4">
@@ -34,9 +48,7 @@ class formHistorialAnemia extends pantalla
                 </div>
             </div>
 
-            <!-- Estadísticas rápidas -->
             <?php 
-            $estadisticas = $objHistorial->obtenerEstadisticasFactoresRiesgo();
             if ($estadisticas && $estadisticas['total_pacientes'] > 0) { ?>
             <div class="row mb-4">
                 <div class="col-12">
@@ -80,7 +92,9 @@ class formHistorialAnemia extends pantalla
                         </tr>
                     </thead>
                     <tbody id="tbodyHistoriales">
-                        <?php if (count($listaHistoriales) > 0) {
+                        <?php 
+                        // ITERATOR: Recorrido del conjunto de datos
+                        if (count($listaHistoriales) > 0) {
                             foreach ($listaHistoriales as $historial) { ?>
                                 <tr>
                                     <td><?php echo htmlspecialchars($historial['anamnesis_id']); ?></td>
@@ -101,6 +115,7 @@ class formHistorialAnemia extends pantalla
                                         <?php
                                         $enfermedades = [];
                                         if (!empty($historial['enfermedades_cardiacas'])) $enfermedades[] = 'Cardíacas';
+                                        // ... (otras enfermedades)
                                         if (!empty($historial['enfermedades_pulmonares'])) $enfermedades[] = 'Pulmonares';
                                         if (!empty($historial['enfermedades_renales'])) $enfermedades[] = 'Renales';
                                         if (!empty($historial['enfermedades_hepaticas'])) $enfermedades[] = 'Hepáticas';
@@ -182,6 +197,7 @@ class formHistorialAnemia extends pantalla
 <script>
 function confirmarEliminar(id) {
     if (confirm('¿Está seguro de que desea eliminar este historial de anemia? Esta acción no se puede deshacer.')) {
+        // Redirige al Invoker (Controlador) para procesar la acción 'eliminar'
         window.location.href = `./getHistorialAnemia.php?action=eliminar&id=${id}`;
     }
 }
@@ -189,12 +205,7 @@ function confirmarEliminar(id) {
 function buscarHistoriales() {
     const termino = document.getElementById('inputBusqueda').value.trim();
     
-    if (termino.length === 0) {
-        location.reload();
-        return;
-    }
-    
-    // Aquí podrías implementar búsqueda AJAX o redirección
+    // Redirige al Invoker (Controlador) para procesar la acción 'buscar'
     window.location.href = `./getHistorialAnemia.php?action=buscar&termino=${encodeURIComponent(termino)}`;
 }
 
@@ -207,6 +218,7 @@ document.getElementById('inputBusqueda').addEventListener('keypress', function(e
 </script>
 
 <?php
+        // TEMPLATE METHOD: Paso 2 - Pie
         $this->pieShow();
     }
 }

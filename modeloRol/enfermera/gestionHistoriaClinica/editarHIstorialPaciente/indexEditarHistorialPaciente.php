@@ -1,5 +1,5 @@
 <?php
-// C:\...\editarHistorialPaciente\indexEditarHistorialPaciente.php
+
 session_start();
 
 include_once('./formEditarHistorialPaciente.php');

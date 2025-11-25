@@ -50,7 +50,7 @@ class formEmicionBoletaPDF
     {
         // --- Preparación de Datos (CORRECCIÓN PHP 5.x: Reemplazo '??' por isset()) ---
         $tipo_doc = isset($data['tipo']) ? $data['tipo'] : 'Boleta';
-        $tipo_comprobante = strtoupper($tipo_doc == 'Boleta' ? 'BOLETA DE VENTA' : 'FACTURA');
+        $tipo_comprobante = strtoupper($tipo_doc == 'Boleta' ? ' PRE FACTURA DE VENTA' : 'FACTURA');
         
         // --- Cálculo de IGV (Asumiendo 18%) ---
         $igv_rate = 0.18;
@@ -157,7 +157,7 @@ class formEmicionBoletaPDF
             <table style='width: 100%; margin-bottom: 20px;'>
                 <tr>
                     <td style='width: 55%;'>
-                        <div class='clinic-title'>CLÍNICA VETERINARIA [GONZALEZ]</div>
+                        <div class='clinic-title'>CLÍNICA[GONZALEZ]</div>
                         <div>RUC: [00000000000]</div>
                         <div>[Dirección de la Clínica]</div>
                     </td>

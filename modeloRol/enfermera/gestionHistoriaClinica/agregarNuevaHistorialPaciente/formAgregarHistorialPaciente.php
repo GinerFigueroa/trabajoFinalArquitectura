@@ -9,7 +9,7 @@ class formAgregarHistorialPaciente extends pantalla
         // Verifica que el usuario esté logueado
         if (!isset($_SESSION['id_usuario'])) {
              // Redirigir al login si no hay sesión
-             header("Location: ../../../../vista/login.php");
+           header("Location: ../../../../securityModule/indexLoginSegurity.php");
              exit();
         }
         

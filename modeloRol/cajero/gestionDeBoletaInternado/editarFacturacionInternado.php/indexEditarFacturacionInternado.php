@@ -1,5 +1,4 @@
 <?php
-// Archivo: indexEditarFacturacionInternado.php
 
 session_start();
 

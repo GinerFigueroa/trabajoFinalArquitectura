@@ -1,4 +1,5 @@
 <?php
+
 session_start();
 
 include_once('../../../../../shared/mensajeSistema.php');
@@ -10,7 +11,9 @@ $objMensaje = new mensajeSistema();
 // Manejo de la acción de REGISTRAR (POST)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] == 'registrar') {
     
-    $objControl->registrarEvolucion($_POST);
+    // El Invoker llama al método coordinador del Mediator
+    // Método: `ejecutarComando`
+    $objControl->ejecutarComando('registrar', $_POST);
 
 } else {
     // Si la solicitud no es válida, redirige al formulario

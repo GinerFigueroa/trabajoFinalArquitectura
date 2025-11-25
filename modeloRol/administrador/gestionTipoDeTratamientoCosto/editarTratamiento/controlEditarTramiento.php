@@ -1,78 +1,256 @@
 <?php
-// C:\...\editarTratamiento\controlEditarTratamiento.php
-include_once('../../../../modelo/TratamientoDAO.php'); 
-include_once('../../../../shared/mensajeSistema.php');
 
-class controlEditarTratamiento // PATRÓN: MEDIATOR / CONTROLLER
+include_once('../../../../shared/mensajeSistema.php');
+include_once('../../../../modelo/TratamientoDAO.php'); 
+
+// ==========================================================
+// 1. ESTRUCTURAS DE PATRONES: DTO, FACTORY, COMMAND, CoR
+// ==========================================================
+
+// DTO/ENTIDAD (Contiene todos los atributos)
+class TratamientoEditarDTO {
+    // Atributos: Los datos del tratamiento
+    public $idTratamiento; public $nombre; public $idEspecialidad;
+    public $descripcion; public $duracion; public $costo;
+    public $requisitos; public $activo;
+
+    // Método: Constructor (Para inicializar atributos)
+    public function __construct(array $data) {
+        $this->idTratamiento = (int)($data['idTratamiento'] ?? 0);
+        $this->nombre = $data['nombre'] ?? '';
+        $this->idEspecialidad = (int)($data['idEspecialidad'] ?? 0);
+        $this->descripcion = $data['descripcion'] ?? '';
+        $this->duracion = (int)($data['duracion'] ?? 0);
+        $this->costo = (float)($data['costo'] ?? 0.0);
+        $this->requisitos = $data['requisitos'] ?? '';
+        $this->activo = $data['activo'] ?? '0';
+    }
+}
+
+// Patrón: COMMAND (Interfaz base)
+interface Comando {
+    // Atributo: Método abstracto `execute`
+    public function execute(): bool;
+    // Atributo: Método abstracto `getValidationMessage`
+    public function getValidationMessage(): ?string;
+}
+
+// Patrón: FACTORY METHOD 🏭
+class TratamientoEditarFactory {
+    // Método: `crearDTO`
+    public static function crearDTO(array $data): TratamientoEditarDTO {
+        return new TratamientoEditarDTO($data);
+    }
+    
+    // Método: `crearComando` (Factory Method)
+    public static function crearComando(string $action, TratamientoEditarDTO $dto): Comando {
+        if ($action === 'editar') {
+            // Atributo: Retorna la instancia del Command concreto
+            return new EditarTratamientoCommand($dto);
+        }
+        throw new Exception("Acción de comando no soportada.");
+    }
+}
+
+// Patrón: CHAIN OF RESPONSIBILITY (Abstract Handler) ⛓️
+abstract class TratamientoEditValidationHandler {
+    // Atributo: $successor
+    protected $successor;
+
+    // Método: `setNext`
+    public function setNext(TratamientoEditValidationHandler $handler): TratamientoEditValidationHandler {
+        $this->successor = $handler;
+        return $handler;
+    }
+
+    // Atributo: Método abstracto `handle`
+    abstract public function handle(TratamientoEditarDTO $dto): ?string;
+}
+
+// Patrón: CHAIN OF RESPONSIBILITY (Concrete Handler 1: Validación de Duración/Costo)
+class DuracionCostoValidationHandler extends TratamientoEditValidationHandler {
+    // Método: `handle`
+    public function handle(TratamientoEditarDTO $dto): ?string {
+        if (!is_numeric($dto->duracion) || $dto->duracion <= 0) {
+            return "La duración debe ser un número entero positivo.";
+        }
+        if (!is_numeric($dto->costo) || $dto->costo < 0) {
+            return "El costo debe ser un número positivo o cero.";
+        }
+        return $this->successor ? $this->successor->handle($dto) : null;
+    }
+}
+
+// Patrón: CHAIN OF RESPONSIBILITY (Concrete Handler 2: Validación de Especialidad y Nombre Único)
+class EspecialidadNombreValidationHandler extends TratamientoEditValidationHandler {
+    // Atributo: $objDAO (Dependencia del DAO para las validaciones)
+    private $objDAO;
+
+    // Método: Constructor (Inicializa el DAO)
+    public function __construct() {
+        $this->objDAO = new TratamientoDAO();
+    }
+    
+    // Método: `handle`
+    public function handle(TratamientoEditarDTO $dto): ?string {
+        // Validación 1: Especialidad existe
+        if (!$this->objDAO->especialidadExiste($dto->idEspecialidad)) {
+            return "La especialidad seleccionada no es válida.";
+        }
+        
+        // Validación 2: Nombre único (excluyendo el propio ID)
+        if ($this->objDAO->validarNombreUnico($dto->nombre, $dto->idEspecialidad, $dto->idTratamiento)) {
+            return "Ya existe otro tratamiento con el nombre '{$dto->nombre}' en esa especialidad.";
+        }
+
+        return $this->successor ? $this->successor->handle($dto) : null;
+    }
+}
+
+// Patrón: COMMAND Concreto 📦
+class EditarTratamientoCommand implements Comando
 {
-    private $objTratamiento;
+    // Atributo: $objDAO (El Receptor)
+    private $objDAO;
+    // Atributo: $dto (Los datos de la solicitud)
+    private $dto;
+    // Atributo: $validationMessage (El Estado del Command)
+    private $validationMessage = null;
+
+    // Método: Constructor (Inicia la Chain of Responsibility)
+    public function __construct(TratamientoEditarDTO $dto)
+    {
+        $this->objDAO = new TratamientoDAO(); 
+        $this->dto = $dto;
+
+        // Configuración de la CHAIN OF RESPONSIBILITY
+        $handler1 = new DuracionCostoValidationHandler();
+        $handler2 = new EspecialidadNombreValidationHandler();
+        
+        // Cadena: Duración/Costo -> Especialidad/Nombre Único
+        $handler1->setNext($handler2);
+        
+        // Ejecución de la cadena de validación
+        $this->validationMessage = $handler1->handle($this->dto);
+    }
+    
+    // Atributo: Método `execute`
+    public function execute(): bool
+    {
+        // Si la validación falló (CoR), no se ejecuta el DAO
+        if ($this->validationMessage) {
+            return false;
+        }
+
+        // Conversión del DTO a array (como lo espera el DAO original)
+        $dataArray = [
+            'idTratamiento' => $this->dto->idTratamiento,
+            'nombre' => $this->dto->nombre,
+            'idEspecialidad' => $this->dto->idEspecialidad,
+            'descripcion' => $this->dto->descripcion,
+            'duracion' => $this->dto->duracion,
+            'costo' => $this->dto->costo,
+            'requisitos' => $this->dto->requisitos,
+            'activo' => $this->dto->activo
+        ];
+
+        // Ejecución del receptor (DAO)
+        return $this->objDAO->editarTratamiento($dataArray);
+    }
+
+    // Atributo: Método `getValidationMessage`
+    public function getValidationMessage(): ?string
+    {
+        return $this->validationMessage;
+    }
+}
+
+// ==========================================================
+// 2. CONTROLADOR (MEDIATOR)
+// ==========================================================
+
+/**
+ * Patrón: MEDIATOR 🤝
+ * Orquesta la interacción entre el Factory, el Command y el manejo de mensajes.
+ */
+class controlEditarTratamiento
+{
+    // Atributo: $objMensaje 
     private $objMensaje;
 
+    // Método: Constructor
     public function __construct()
     {
-        $this->objTratamiento = new TratamientoDAO();
         $this->objMensaje = new mensajeSistema();
     }
 
     /**
-     * PATRÓN: CHAIN OF RESPONSIBILITY para validaciones de negocio.
-     * Acepta el DTO/Array.
+     * Atributo: Método `ejecutarComando` (Punto de coordinación central)
+     * Patrón: STATE 🚦 (Maneja el flujo de la respuesta basado en el estado del Command)
      */
-    private function validarEdicionChain(array $data)
+    public function ejecutarComando(string $action, array $data)
     {
-        // 1. Validar la existencia de la especialidad (Delega al DAO)
-        if (!$this->objTratamiento->especialidadExiste($data['idEspecialidad'])) {
-            return "La especialidad seleccionada no es válida.";
-        }
+        $idTratamiento = $data['idTratamiento'] ?? 0;
+        $urlRetornoError = "./indexEditarTratamiento.php?id=" . $idTratamiento;
+        $urlRetornoSuccess = "../indexTipoTratamiento.php";
 
-        // 2. Validar nombre único (Excluyendo el ID actual)
-        if ($this->objTratamiento->validarNombreUnico($data['nombre'], $data['idEspecialidad'], $data['idTratamiento'])) {
-            return "Ya existe otro tratamiento con el nombre '{$data['nombre']}' en esa especialidad.";
-        }
-        
-        // 3. Validación de duración
-        if (!is_numeric($data['duracion']) || $data['duracion'] <= 0) {
-            return "La duración debe ser un número entero positivo.";
-        }
+        try {
+            // 1. Factory Method: Creación del DTO
+            $dto = TratamientoEditarFactory::crearDTO($data);
+            
+            // 2. Factory Method: Creación del COMMAND
+            $command = TratamientoEditarFactory::crearComando($action, $dto);
 
-        // 4. Validación del costo
-        if (!is_numeric($data['costo']) || $data['costo'] < 0) {
-            return "El costo debe ser un número positivo.";
-        }
-        
-        // 5. Validación de estado
-        if ($data['activo'] !== '0' && $data['activo'] !== '1') {
-            return "El estado del tratamiento no es válido.";
-        }
+            // 3. Command: Ejecución
+            // Atributo: $resultado (Estado de la operación DAO: true/false)
+            $resultado = $command->execute();
 
-        return true; // Pasa todas las validaciones
+            // 4. State: Leer el estado de la validación del Command (CoR result)
+            // Atributo: $mensajeError
+            $mensajeError = $command->getValidationMessage();
+
+            // 5. Mediator/STATE: Lógica de respuesta
+            if ($mensajeError) {
+                // Estado 1: Error de validación (Falló la CoR)
+                $this->objMensaje->mensajeSistemaShow(
+                    "❌ Error de validación: " . $mensajeError,
+                    $urlRetornoError,
+                    "systemOut", // Usamos systemOut para evitar que el mensaje se cierre automáticamente
+                    false
+                );
+            } elseif ($resultado) {
+                // Estado 2: Éxito
+                $this->objMensaje->mensajeSistemaShow(
+                    "✅ Tratamiento ID {$dto->idTratamiento} actualizado correctamente.", 
+                    $urlRetornoSuccess, 
+                    'success'
+                );
+            } else {
+                // Estado 3: Error de base de datos
+                $this->objMensaje->mensajeSistemaShow(
+                    '⚠️ Error al editar el tratamiento. No se realizó ningún cambio o fallo en DB.', 
+                    $urlRetornoError, 
+                    'error'
+                );
+            }
+        } catch (Exception $e) {
+            // Estado 4: Error interno (Fallo en Factory o ejecución)
+             $this->objMensaje->mensajeSistemaShow(
+                '❌ Error interno del sistema: ' . $e->getMessage(), 
+                $urlRetornoError, 
+                'error'
+            );
+        }
     }
-
+    
     /**
-     * Método principal para editar un tratamiento (PATRÓN: COMMAND).
-     * Acepta el DTO/Array.
+     * Método de compatibilidad: Permite que el código original siga llamando a este método.
+     * Atributo: Método `editarTratamiento` (Función externa de compatibilidad)
      */
     public function editarTratamiento(array $data)
     {
-        $idTratamiento = $data['idTratamiento']; 
-        
-        // 1. Ejecución del CHAIN OF RESPONSIBILITY
-        $validacion = $this->validarEdicionChain($data);
-
-        if ($validacion !== true) {
-            $this->objMensaje->mensajeSistemaShow($validacion, './indexEditarTratamiento.php?id=' . $idTratamiento, 'systemOut', false);
-            return;
-        }
-        
-        // 2. Ejecución del COMMAND (Delegación al DAO con el DTO/Array)
-        $resultado = $this->objTratamiento->editarTratamiento($data);
-        
-        // 3. Manejo de Respuesta
-        if ($resultado) {
-            $this->objMensaje->mensajeSistemaShow('Tratamiento editado correctamente.', '../indexTipoTratamiento.php', 'success');
-        } else {
-            $this->objMensaje->mensajeSistemaShow('Error al editar el tratamiento. Por favor, intente de nuevo.', './indexEditarTratamiento.php?id=' . $idTratamiento, 'error');
-        }
+        // El viejo método ahora solo llama al Mediator
+        $this->ejecutarComando('editar', $data);
     }
 }
 ?>

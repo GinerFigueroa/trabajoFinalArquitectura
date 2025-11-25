@@ -1,42 +1,116 @@
 <?php
 // Archivo: controlCitas.php
+
+// Inclusiones de dependencias
 include_once('../../../modelo/CitasDAO.php'); 
 include_once('../../../shared/mensajeSistema.php');
 
-class controlCitas // PATRÓN: MEDIATOR / COMMAND
-{
-    private $objCitaDAO;
-    private $objMensaje;
+// ==========================================================
+// PATRÓN: CHAIN OF RESPONSIBILITY (Manejo de Solicitudes)
+// ==========================================================
 
-    public function __construct()
-    {
-        // Se asume que CitasDAO.php contiene la clase CitaDAO
-        $this->objCitaDAO = new CitaDAO(); 
+// Atributos Abstractos: Ninguno
+// Método Abstracto: handle(array $request)
+abstract class SolicitudHandler {
+    protected $siguienteHandler;
+    protected $objMensaje;
+
+    public function __construct() {
         $this->objMensaje = new mensajeSistema();
     }
 
-    /**
-     * PATRÓN: COMMAND (Ejecuta la acción de negocio).
-     * @param int $idCita
-     */
-    public function eliminarCita($idCita)
-    {
-        // 1. Validación básica (Chain of Responsibility simple)
-        if (empty($idCita) || !is_numeric($idCita) || $idCita <= 0) {
-            $this->objMensaje->mensajeSistemaShow("ID de cita no válido para eliminar.", "./indexTotalCitas.php", "systemOut", false);
-            return;
-        }
+    public function setNext(SolicitudHandler $handler): SolicitudHandler {
+        $this->siguienteHandler = $handler;
+        return $handler;
+    }
 
-        // 2. Delegación al DAO (Ejecución del Command)
+    abstract public function handle(array $request);
+}
+
+// ----------------------------------------------------------
+// Paso 1: Valida que el ID esté presente y sea un número
+// ----------------------------------------------------------
+class ValidarIdHandler extends SolicitudHandler {
+    // Ejemplo Método: handle(array $request)
+    public function handle(array $request) {
+        if (!isset($request['id']) || !is_numeric($request['id']) || (int)$request['id'] <= 0) {
+            $this->objMensaje->mensajeSistemaShow("ID de cita no válido o no proporcionado.", "./indexCita.php", "systemOut", false);
+            return null; // Detiene la cadena
+        }
+        return $this->siguienteHandler ? $this->siguienteHandler->handle($request) : $request;
+    }
+}
+
+// ----------------------------------------------------------
+// Paso 2: Ejecutar la acción
+// ----------------------------------------------------------
+class EjecutarEliminacionHandler extends SolicitudHandler {
+    private $objCitaDAO;
+
+    public function __construct() {
+        parent::__construct();
+        // PATRÓN FACTORY METHOD (Sencillo): Fábrica de DAO
+        $this->objCitaDAO = $this->createCitasDAO(); 
+    }
+
+    // Ejemplo Método: createCitasDAO() (Implementación del Factory Method)
+    private function createCitasDAO(): CitasDAO {
+        return new CitasDAO();
+    }
+
+    // Ejemplo Método: handle(array $request)
+    public function handle(array $request) {
+        $idCita = (int)$request['id'];
+
+        // Delegación al DAO (El DAO actúa como el Receptor de la acción)
         $resultado = $this->objCitaDAO->eliminarCita($idCita);
         
-        // 3. Manejo de la respuesta
+        // Manejo de la respuesta
         if ($resultado) {
-            $this->objMensaje->mensajeSistemaShow("Cita eliminada correctamente.", "./indexTotalCitas.php", "success");
+            $this->objMensaje->mensajeSistemaShow("Cita eliminada correctamente.", "./indexCita.php", "success");
         } else {
-            // El error puede ser porque la cita no existía o un error de BD.
-            $this->objMensaje->mensajeSistemaShow("Error al eliminar la cita. Puede que ya no exista o haya un error en la base de datos.", "./indexTotalCitas.php", "error");
+            $this->objMensaje->mensajeSistemaShow("Error al eliminar la cita. Verifique si la cita existe.", "./indexCita.php", "error");
         }
+        return null; // La acción finaliza aquí
+    }
+}
+
+// ==========================================================
+// PATRÓN: MEDIATOR (Coordinador)
+// ==========================================================
+
+/**
+ * Clase controlCitas (PATRÓN: MEDIATOR) 🤝
+ * Atributos: $chain, $objMensaje
+ * Métodos: __construct(), eliminarCita(array $request)
+ */
+class controlCitas 
+{
+    private $chain;
+    private $objMensaje;
+
+    // Método: __construct()
+    public function __construct()
+    {
+        $this->objMensaje = new mensajeSistema();
+        // Configuración de la cadena de responsabilidad
+        $validarId = new ValidarIdHandler();
+        $ejecutarEliminacion = new EjecutarEliminacionHandler();
+        
+        // ⛓️ La cadena se establece: ID -> Ejecutar
+        $validarId->setNext($ejecutarEliminacion);
+        $this->chain = $validarId;
+    }
+
+    /**
+     * Inicia la ejecución de la Cadena de Responsabilidad.
+     * Ejemplo Método: eliminarCita(array $request)
+     * @param array $request Contiene 'action' y 'id'.
+     */
+    public function eliminarCita(array $request)
+    {
+        // 🤝 El Mediator inicia la coordinación a través de la cadena
+        $this->chain->handle($request);
     }
 }
 ?>

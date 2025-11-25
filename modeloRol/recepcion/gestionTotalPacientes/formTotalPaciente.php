@@ -1,15 +1,52 @@
 <?php
+
 include_once('../../../shared/pantalla.php');
 include_once('../../../modelo/PacienteDAO.php');
 
-class formTotalPaciente extends pantalla
+// ==========================================================
+// ESTRUCTURA DE PATRONES: ITERATOR (Auxiliar)
+// ==========================================================
+
+/**
+ * Clase AuxiliarIterator (PATRÓN: ITERATOR) 📜
+ * Permite recorrer la colección de pacientes de forma abstracta.
+ * Atributos: $data, $position
+ * Métodos: __construct, rewind, current, key, next, valid
+ */
+class AuxiliarIterator implements Iterator {
+    private $data = [];
+    private $position = 0;
+    
+    public function __construct(array $array) { $this->data = array_values($array); } // Asegura índices numéricos
+    public function rewind(): void { $this->position = 0; }
+    public function current(): mixed { return $this->data[$this->position]; }
+    public function key(): mixed { return $this->position; }
+    public function next(): void { ++$this->position; }
+    public function valid(): bool { return isset($this->data[$this->position]); }
+}
+
+
+// ==========================================================
+// ESTRUCTURA DE PATRONES: TEMPLATE METHOD y STATE (en la presentación)
+// ==========================================================
+
+/**
+ * Clase formTotalPaciente (PATRÓN: TEMPLATE METHOD) 🎨
+ * Hereda y utiliza métodos abstractos de 'pantalla' (cabeceraShow y pieShow).
+ */
+class formTotalPaciente extends pantalla 
 {
+    // Método: formTotalPacienteShow()
     public function formTotalPacienteShow()
     {
+        // 1. TEMPLATE METHOD: Paso de la cabecera
         $this->cabeceraShow("Gestión de Pacientes");
 
-        $objPaciente = new PacienteDAO();
-        $listaPacientes = $objPaciente->obtenerTodosPacientes();
+        $objPacienteDAO = new PacienteDAO();
+        $listaPacientes = $objPacienteDAO->obtenerTodosPacientes();
+
+        // 2. ITERATOR: Creación del iterador para la lista de pacientes
+        $pacientesIterator = new AuxiliarIterator($listaPacientes);
 ?>
 
 <div class="container mt-4">
@@ -42,17 +79,18 @@ class formTotalPaciente extends pantalla
                             <th>DNI</th>
                             <th>Email</th>
                             <th>Teléfono</th>
-                            <th>Estado</th> <!-- COLUMNA NUEVA -->
-                            <th>Acciones</th>
+                            <th>Estado</th> <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php if (count($listaPacientes) > 0) {
-                            foreach ($listaPacientes as $paciente) { 
-                                $activo = $paciente['activo'] == 1;
-                                $claseEstado = $activo ? 'bg-success' : 'bg-danger';
-                                $textoEstado = $activo ? 'Activo' : 'Inactivo';
-                            ?>
+                        <?php 
+                        // 3. ITERATOR: Recorrido de la lista de pacientes
+                        foreach ($pacientesIterator as $paciente) { 
+                            // 4. PATRÓN STATE (Representación visual)
+                            $activo = $paciente['activo'] == 1;
+                            $claseEstado = $activo ? 'bg-success' : 'bg-danger';
+                            $textoEstado = $activo ? 'Activo' : 'Inactivo';
+                        ?>
                                 <tr>
                                     <td><?php echo htmlspecialchars($paciente['id_paciente']); ?></td>
                                     <td><?php echo htmlspecialchars($paciente['usuario_usuario']); ?></td>
@@ -70,20 +108,18 @@ class formTotalPaciente extends pantalla
                                             <i class="bi bi-pencil-fill"></i>
                                         </a>
                                         <?php if ($activo) { ?>
-                                            <!-- Para pacientes activos: intentar eliminar -->
                                             <button class="btn btn-sm btn-danger" title="Eliminar/Desactivar" onclick="confirmarEliminar(<?php echo htmlspecialchars($paciente['id_paciente']); ?>)">
                                                 <i class="bi bi-trash-fill"></i>
                                             </button>
                                         <?php } else { ?>
-                                            <!-- Para pacientes inactivos: solo reactivar -->
                                             <button class="btn btn-sm btn-success" title="Reactivar" onclick="confirmarReactivar(<?php echo htmlspecialchars($paciente['id_paciente']); ?>)">
                                                 <i class="bi bi-person-check-fill"></i>
                                             </button>
                                         <?php } ?>
                                     </td>
                                 </tr>
-                        <?php }
-                        } else { ?>
+                        <?php } ?>
+                        <?php if ($pacientesIterator->key() === 0 && !$pacientesIterator->valid()) { ?>
                             <tr>
                                 <td colspan="8" class="text-center">No hay pacientes registrados.</td>
                             </tr>
@@ -98,18 +134,21 @@ class formTotalPaciente extends pantalla
 <script>
     function confirmarEliminar(id) {
         if (confirm('¿Está seguro de que desea ELIMINAR este paciente?\n\n• Si es RECIÉN registrado: se ELIMINARÁ completamente\n• Si tiene historial: se DESACTIVARÁ')) {
-            window.location.href = `./getPaciente.php?action=eliminar&id=${id}`;
+            // Llama al FRONT CONTROLLER (getPaciente.php) con el Comando 'eliminar'
+            window.location.href = `./getPaciente.php?action=eliminar&id=${id}`; 
         }
     }
 
     function confirmarReactivar(id) {
         if (confirm('¿Está seguro de que desea REACTIVAR este paciente?')) {
+            // Llama al FRONT CONTROLLER (getPaciente.php) con el Comando 'reactivar'
             window.location.href = `./getPaciente.php?action=reactivar&id=${id}`;
         }
     }
 </script>
 
 <?php
+        // 1. TEMPLATE METHOD: Paso del pie de página
         $this->pieShow();
     }
 }
